@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "エケベリアのカレンダー確認と次回確認日を管理する個人用PWA v7",
+  "description": "エケベリアの観察・水やり・次回確認日を管理する個人用PWA v8",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
