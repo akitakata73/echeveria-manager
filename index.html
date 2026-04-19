@@ -1,519 +1,79 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>エケベリア管理</title>
-  <meta name="theme-color" content="#4b7f52" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="エケベリア管理" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="./icon-192.png" />
-  <style>
-    :root{
-      --bg:#f5f5f2;--card:#fff;--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;
-      --accent:#4b7f52;--accent2:#e8f3ea;--warn:#b45309;--danger:#b91c1c;
-      --shadow:0 8px 24px rgba(0,0,0,.08);--radius:18px;
-      --safe-bottom: env(safe-area-inset-bottom);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;background:var(--bg);color:var(--ink);
-      font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
-      -webkit-text-size-adjust:100%;
-    }
-    .app{max-width:520px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column}
-    header{
-      position:sticky;top:0;z-index:5;
-      background:rgba(245,245,242,.94);backdrop-filter:blur(10px);
-      padding:14px 16px 10px;border-bottom:1px solid rgba(229,231,235,.7);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    h1{font-size:22px;margin:0;font-weight:850;letter-spacing:-.02em}
-    .small{font-size:12px;color:var(--muted);line-height:1.4}
-    main{flex:1;padding:0 14px 92px}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin:12px 0}
-    .section-title{font-size:15px;font-weight:850;margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:center}
-    .btn{border:0;border-radius:14px;padding:12px;background:var(--accent);color:#fff;font-weight:850;font-size:14px;width:100%;cursor:pointer}
-    .btn.secondary{background:#eef2f0;color:#24452a}.btn.ghost{background:#fff;border:1px solid var(--line);color:#374151}.btn.danger{background:#b91c1c}
-    .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btnrow.three{grid-template-columns:1fr 1fr 1fr}
-    .plant-card{display:flex;gap:12px;align-items:center;cursor:pointer}
-    .avatar{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#d9eadb,#fff);display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid var(--line);flex:none}
-    .grow{flex:1}.title{font-size:16px;font-weight:850;margin-bottom:2px}.subtitle{font-size:12px;color:var(--muted);line-height:1.42}
-    .pill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:var(--accent2);color:#2f6238;font-size:11px;font-weight:800;margin:3px 3px 0 0}
-    .pill.gray{background:#f3f4f6;color:#4b5563}.pill.warn{background:#fff7ed;color:var(--warn)}.pill.danger{background:#fef2f2;color:var(--danger)}
-    .form label{display:block;font-size:12px;font-weight:850;color:#4b5563;margin:13px 0 6px}
-    .form input,.form select,.form textarea{
-      width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;background:#fff;outline:none;
-    }
-    .form textarea{min-height:88px;resize:vertical}
-    .search{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;font-size:16px;outline:none;margin:8px 0}
-    .chips{display:flex;gap:8px;overflow:auto;padding:4px 0 8px}.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;color:#4b5563;cursor:pointer}.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-    .kv{display:grid;grid-template-columns:98px 1fr;gap:8px;font-size:13px;padding:8px 0;border-bottom:1px solid #f0f0f0}.kv .k{color:var(--muted);font-weight:800}
-    .history{border-left:3px solid #d6e8d8;margin:10px 0 0 4px;padding-left:12px}.hist-item{margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}.hist-title{font-size:13px;font-weight:850}.hist-meta{font-size:11px;color:var(--muted);margin-top:2px}.hist-text{font-size:13px;line-height:1.45;margin-top:5px}
-    .tabbar{
-      position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-width:520px;
-      height:78px;padding-bottom:var(--safe-bottom);
-      background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);
-    }
-    .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#6b7280;font-size:10px;font-weight:800;cursor:pointer}.tab .ico{font-size:20px}.tab.active{color:var(--accent)}
-    .master-row,.export-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:12px 0;gap:10px}
-    .master-row:last-child,.export-row:last-child{border-bottom:0}.master-name{font-size:14px;font-weight:850}.master-meta{font-size:11px;color:var(--muted);margin-top:2px}
-    .iconbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 9px;font-size:12px;font-weight:850;color:#374151;cursor:pointer}.iconbtn.danger{color:#b91c1c}
-    .notice{background:#fffbeb;color:#92400e;border:1px solid #fde68a;padding:10px;border-radius:14px;font-size:12px;line-height:1.45;margin-top:8px}
-    .empty-note{text-align:center;color:var(--muted);padding:24px 10px;font-size:13px;line-height:1.5}
-    .preview{background:#0f172a;color:#e5e7eb;border-radius:14px;padding:12px;font-size:11px;line-height:1.45;white-space:pre;overflow:auto;max-height:340px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-    .toast{position:fixed;left:18px;right:18px;bottom:92px;max-width:480px;margin:auto;background:#111827;color:#fff;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:800;opacity:0;transform:translateY(12px);transition:.25s;pointer-events:none;z-index:20}.toast.show{opacity:1;transform:translateY(0)}
-    input[type=file]{font-size:14px}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>エケベリア管理</title>
+<meta name="theme-color" content="#4b7f52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="エケベリア管理">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root{--bg:#f5f5f2;--card:#fff;--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;--accent:#4b7f52;--accent2:#e8f3ea;--warn:#b45309;--danger:#b91c1c;--shadow:0 8px 24px rgba(0,0,0,.08);--radius:18px;--safe-bottom:env(safe-area-inset-bottom)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;-webkit-text-size-adjust:100%}
+.app{max-width:520px;margin:0 auto;min-height:100svh;display:flex;flex-direction:column}header{position:sticky;top:0;z-index:5;background:rgba(245,245,242,.94);backdrop-filter:blur(10px);padding:14px 16px 10px;border-bottom:1px solid rgba(229,231,235,.7);display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-size:22px;margin:0;font-weight:850}.small{font-size:12px;color:var(--muted);line-height:1.4}main{flex:1;padding:0 14px 92px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin:12px 0}.section-title{font-size:15px;font-weight:850;margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:center}
+.btn{border:0;border-radius:14px;padding:12px;background:var(--accent);color:#fff;font-weight:850;font-size:14px;width:100%;cursor:pointer}.btn.secondary{background:#eef2f0;color:#24452a}.btn.ghost{background:#fff;border:1px solid var(--line);color:#374151}.btn.danger{background:#b91c1c}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btnrow.three{grid-template-columns:1fr 1fr 1fr}.plant-card{display:flex;gap:12px;align-items:center;cursor:pointer}
+.avatar{width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,#d9eadb,#fff);display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid var(--line);flex:none}.grow{flex:1}.title{font-size:16px;font-weight:850;margin-bottom:2px}.subtitle{font-size:12px;color:var(--muted);line-height:1.42}
+.pill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:var(--accent2);color:#2f6238;font-size:11px;font-weight:800;margin:3px 3px 0 0}.pill.gray{background:#f3f4f6;color:#4b5563}.pill.warn{background:#fff7ed;color:var(--warn)}.pill.danger{background:#fef2f2;color:var(--danger)}
+.form label{display:block;font-size:12px;font-weight:850;color:#4b5563;margin:13px 0 6px}.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;background:#fff;outline:none}.form textarea{min-height:88px;resize:vertical}
+.search{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;font-size:16px;outline:none;margin:8px 0}.chips{display:flex;gap:8px;overflow:auto;padding:4px 0 8px}.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;color:#4b5563;cursor:pointer}.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.kv{display:grid;grid-template-columns:104px 1fr;gap:8px;font-size:13px;padding:8px 0;border-bottom:1px solid #f0f0f0}.kv .k{color:var(--muted);font-weight:800}.history{border-left:3px solid #d6e8d8;margin:10px 0 0 4px;padding-left:12px}.hist-item{margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}.hist-title{font-size:13px;font-weight:850}.hist-meta{font-size:11px;color:var(--muted);margin-top:2px}.hist-text{font-size:13px;line-height:1.45;margin-top:5px}
+.tabbar{position:fixed;bottom:0;left:0;right:0;margin:0 auto;max-width:520px;height:78px;padding-bottom:var(--safe-bottom);background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr)}.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#6b7280;font-size:10px;font-weight:800;cursor:pointer}.tab .ico{font-size:20px}.tab.active{color:var(--accent)}
+.master-row,.export-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:12px 0;gap:10px}.master-row:last-child,.export-row:last-child{border-bottom:0}.master-name{font-size:14px;font-weight:850}.master-meta{font-size:11px;color:var(--muted);margin-top:2px}.iconbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 9px;font-size:12px;font-weight:850;color:#374151;cursor:pointer}.iconbtn.danger{color:#b91c1c}
+.notice{background:#fffbeb;color:#92400e;border:1px solid #fde68a;padding:10px;border-radius:14px;font-size:12px;line-height:1.45;margin-top:8px}.empty-note{text-align:center;color:var(--muted);padding:24px 10px;font-size:13px;line-height:1.5}.preview{background:#0f172a;color:#e5e7eb;border-radius:14px;padding:12px;font-size:11px;line-height:1.45;white-space:pre;overflow:auto;max-height:340px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+.toast{position:fixed;left:18px;right:18px;bottom:92px;max-width:480px;margin:auto;background:#111827;color:#fff;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:800;opacity:0;transform:translateY(12px);transition:.25s;pointer-events:none;z-index:20}.toast.show{opacity:1;transform:translateY(0)}
+</style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div>
-      <h1 id="screenTitle">ホーム</h1>
-      <div class="small" id="screenSub">エケベリア管理 PWA v1</div>
-    </div>
-    <button class="btn secondary" style="width:auto;padding:9px 12px" onclick="openAddPlant()">＋株</button>
-  </header>
-  <main id="main"></main>
-  <nav class="tabbar">
-    <div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div>
-    <div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div>
-    <div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div>
-    <div class="tab" onclick="go('places')" id="tab-places"><div class="ico">🪴</div><div>置き場</div></div>
-    <div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div>
-  </nav>
-</div>
-<div class="toast" id="toast"></div>
-
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v2</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="openAddPlant()">＋株</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('places')" id="tab-places"><div class="ico">🪴</div><div>置き場</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const STORAGE_KEY = "echeveria_pwa_v1_data";
-let state = null;
-let current = "home";
-let filter = "すべて";
-let selectedPlantId = null;
-let activeMaster = "cultivars";
-let editingMasterId = null;
-
-function defaultData(){
-  const now = nowText();
-  return {
-    version:"pwa-v1",
-    updatedAt:now,
-    masters:{
-      cultivars:[
-        {id:id("cv"),name:"桃太郎",note:"赤い爪。通常管理"},
-        {id:id("cv"),name:"ブラックマディバ",note:"辛め管理"},
-        {id:id("cv"),name:"大和錦",note:"葉挿し・胴切り候補"},
-        {id:id("cv"),name:"リラシナ",note:"白粉系"},
-        {id:id("cv"),name:"チワワエンシス",note:"動き早め"}
-      ],
-      pots:[
-        {id:id("pot"),name:"A-25S浅鉢",note:"標準"},
-        {id:id("pot"),name:"小型仮鉢",note:"発根待ち"},
-        {id:id("pot"),name:"葉挿しトレー",note:"葉挿し用"}
-      ],
-      media:[
-        {id:id("med"),name:"チャコボール",note:"標準用土"},
-        {id:id("med"),name:"チャコボール＋少量肥料",note:"成株用"}
-      ]
-    },
-    trays:[
-      {id:id("tray"),name:"A-25Sトレー1",type:"A-25S 35個トレー",location:"南向き窓辺",dry:"普通",light:"強め",wind:"弱風あり",note:"中央は乾きやすい"},
-      {id:id("tray"),name:"発根待ちエリア",type:"仮置き",location:"窓辺から少し離す",dry:"遅め",light:"中程度",wind:"弱め",note:"水を入れすぎない"}
-    ],
-    plants:[],
-    histories:[],
-    exportLogs:[]
-  };
-}
-function seedData(){
-  const d = defaultData();
-  const cv1 = d.masters.cultivars[0].id, cv2 = d.masters.cultivars[1].id, cv3=d.masters.cultivars[2].id;
-  const pot1=d.masters.pots[0].id, pot3=d.masters.pots[2].id, med1=d.masters.media[0].id, tray1=d.trays[0].id, root=d.trays[1].id;
-  d.plants=[
-    plantObj("桃太郎 1号","🌱",cv1,pot1,med1,tray1,"中央","良好","2026-04-15 19:30","普通","","上からしっかり","2026-04-19","中心は締まり気味。"),
-    plantObj("ブラックマディバ","🪷",cv2,pot1,med1,tray1,"端・風弱め","要観察","2026-04-10 20:10","少なめ","15","株元に少量","2026-04-18","辛め管理。"),
-    plantObj("大和錦 葉挿しA","🍃",cv3,pot3,med1,root,"端・乾き遅め","葉挿し","未実施","なし","","なし","2026-04-20","芽先行。")
-  ];
-  d.plants.forEach(p=>d.histories.push({id:id("his"),plantId:p.id,type:"system",title:"初期データ",happenedAt:nowText(),note:"サンプルとして登録"}));
-  return d;
-}
-function plantObj(name,icon,cultivarId,potId,mediumId,trayId,position,status,lastWater,amount,ml,method,nextCheck,memo){
-  return {id:id("pl"),displayName:name,icon,cultivarId,potId,mediumId,trayId,position,status,growthType:status==="葉挿し"?"葉挿し":"通常株",lastWateredAt:lastWater,lastWaterAmountLevel:amount,lastWaterAmountMl:ml,lastWaterMethod:method,nextCheckDate:nextCheck,memo,isArchived:false,createdAt:nowText(),updatedAt:nowText()};
-}
-function id(prefix){return prefix+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
-function nowText(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-function dateOnly(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function load(){
-  const raw=localStorage.getItem(STORAGE_KEY);
-  if(raw){
-    try{state=JSON.parse(raw)}
-    catch{state=seedData();save()}
-  }else{
-    state=seedData();save();
-  }
-}
-function save(){
-  state.updatedAt=nowText();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-function resetConfirm(){
-  if(confirm("初期化します。現在のデータは消えます。先にJSONバックアップを推奨します。")){
-    state=seedData();save();toast("初期化しました");go("home");
-  }
-}
-function el(id){return document.getElementById(id)}
-function toast(msg){const t=el("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v1"}
-function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));const tab=el("tab-"+current);if(tab)tab.classList.add("active")}
-function go(s){current=s;setTabs();if(s==="home")renderHome();if(s==="plants")renderPlants();if(s==="records")renderRecords();if(s==="places")renderPlaces();if(s==="settings")renderSettings()}
-function mList(type){return type==="places"?state.trays:state.masters[type]}
-function mName(type,id){return (mList(type).find(x=>x.id===id)||{}).name||"未設定"}
-function plantById(id){return state.plants.find(p=>p.id===id)}
-function activePlants(){return state.plants.filter(p=>!p.isArchived)}
-function usedCount(type,id){
-  if(type==="cultivars")return activePlants().filter(p=>p.cultivarId===id).length;
-  if(type==="pots")return activePlants().filter(p=>p.potId===id).length;
-  if(type==="media")return activePlants().filter(p=>p.mediumId===id).length;
-  if(type==="places")return activePlants().filter(p=>p.trayId===id).length;
-  return 0;
-}
-function masterName(type){return {cultivars:"品種",pots:"鉢",media:"用土",places:"置き場所"}[type]}
-function statusClass(status){return status==="要観察"||status==="水切れ気味"?"warn":(status==="葉挿し"||status==="発根待ち"||status==="蒸れ注意")?"danger":""}
-function plantCard(p){
-  return `<div class="card plant-card" onclick="openDetail('${p.id}')">
-    <div class="avatar">${p.icon||"🌱"}</div><div class="grow">
-      <div class="title">${escapeHtml(p.displayName)}</div>
-      <div class="subtitle">${escapeHtml(mName("cultivars",p.cultivarId))}｜${escapeHtml(mName("places",p.trayId))}｜${escapeHtml(p.position||"")}<br>最終水やり：${escapeHtml(p.lastWateredAt||"未実施")}｜量：${escapeHtml(p.lastWaterAmountLevel||"未記録")}${p.lastWaterAmountMl?`（${escapeHtml(p.lastWaterAmountMl)}mL）`:""}</div>
-      <span class="pill ${statusClass(p.status)}">${escapeHtml(p.status)}</span><span class="pill gray">${escapeHtml(p.growthType||"通常株")}</span><span class="pill gray">次回 ${escapeHtml(p.nextCheckDate||"未設定")}</span>
-    </div>
-  </div>`;
-}
-function renderHome(){
-  setHeader("ホーム","今日見る株を先に表示");
-  const today=dateOnly();
-  const due=activePlants().filter(p=>(p.nextCheckDate&&p.nextCheckDate<=today)||p.status!=="良好");
-  const recent=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,5);
-  el("main").innerHTML=`
-    <div class="section-title">今日確認する株 <span class="small">${due.length}件</span></div>
-    ${due.map(plantCard).join("")||`<div class="card empty-note">今日の確認対象はありません。</div>`}
-    <div class="section-title">操作</div>
-    <div class="card">
-      <button class="btn" onclick="openAddPlant()">新規株を登録</button>
-      <div class="btnrow"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button><button class="btn secondary" onclick="go('settings')">マスター管理</button></div>
-    </div>
-    <div class="section-title">データ状況</div>
-    <div class="card">
-      <div class="kv"><div class="k">株数</div><div>${activePlants().length}株</div></div>
-      <div class="kv"><div class="k">履歴</div><div>${state.histories.length}件</div></div>
-      <div class="kv"><div class="k">最終更新</div><div>${escapeHtml(state.updatedAt||"")}</div></div>
-    </div>
-    <div class="section-title">最近の記録</div>
-    <div class="card">${historyHtml(recent)}</div>`;
-}
-function renderPlants(){
-  setHeader("株一覧","検索・絞り込み");
-  const chips=["すべて","良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意"];
-  let list=activePlants().filter(p=>filter==="すべて"||p.status===filter);
-  el("main").innerHTML=`<input class="search" placeholder="管理名・品種名・置き場所で検索" oninput="searchPlants(this.value)">
-    <div class="chips">${chips.map(c=>`<div class="chip ${c===filter?'active':''}" onclick="filter='${c}';renderPlants()">${c}</div>`).join("")}</div>
-    <div class="btnrow"><button class="btn secondary" onclick="openAddPlant()">株を登録</button><button class="btn secondary" onclick="openExportPreview('plants')">CSV</button></div>
-    <div id="plantList">${list.map(plantCard).join("")||`<div class="card empty-note">株がありません。</div>`}</div>`;
-}
-function searchPlants(q){
-  q=q.trim();
-  const list=activePlants().filter(p=>(filter==="すべて"||p.status===filter)&&(p.displayName.includes(q)||mName("cultivars",p.cultivarId).includes(q)||mName("places",p.trayId).includes(q)));
-  el("plantList").innerHTML=list.map(plantCard).join("")||`<div class="card empty-note">該当する株がありません。</div>`;
-}
-function openDetail(id){
-  selectedPlantId=id;current="plants";setTabs();
-  const p=plantById(id);
-  setHeader(p.displayName,mName("cultivars",p.cultivarId));
-  const histories=state.histories.filter(h=>h.plantId===p.id).sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,8);
-  el("main").innerHTML=`<div class="card">
-    <div style="font-size:82px;text-align:center">${p.icon||"🌱"}</div>
-    <div class="title">${escapeHtml(p.displayName)}</div><div class="subtitle">${escapeHtml(mName("cultivars",p.cultivarId))}｜${escapeHtml(mName("places",p.trayId))}｜${escapeHtml(p.position||"")}</div>
-    <span class="pill ${statusClass(p.status)}">${escapeHtml(p.status)}</span><span class="pill gray">${escapeHtml(p.growthType||"通常株")}</span><span class="pill gray">${escapeHtml(mName("pots",p.potId))}</span><span class="pill gray">${escapeHtml(mName("media",p.mediumId))}</span>
-    <div class="kv"><div class="k">最終水やり</div><div>${escapeHtml(p.lastWateredAt||"未実施")}</div></div>
-    <div class="kv"><div class="k">水やり量</div><div>${escapeHtml(p.lastWaterAmountLevel||"未記録")}${p.lastWaterAmountMl?`（${escapeHtml(p.lastWaterAmountMl)}mL）`:""}／${escapeHtml(p.lastWaterMethod||"未記録")}</div></div>
-    <div class="kv"><div class="k">次回確認</div><div>${escapeHtml(p.nextCheckDate||"未設定")}</div></div>
-    <div class="kv"><div class="k">メモ</div><div>${escapeHtml(p.memo||"—")}</div></div>
-    <div class="btnrow three"><button class="btn" onclick="openWater('${p.id}')">水やり</button><button class="btn secondary" onclick="openObserve('${p.id}')">観察</button><button class="btn ghost" onclick="openEditPlant('${p.id}')">編集</button></div>
-  </div>
-  <div class="section-title">履歴</div><div class="card">${historyHtml(histories)}</div>`;
-}
-function historyHtml(list){
-  if(!list.length)return `<div class="empty-note">履歴はありません。</div>`;
-  return `<div class="history">${list.map(h=>{
-    const p=plantById(h.plantId);
-    return `<div class="hist-item"><div class="hist-title">${p?(p.icon||"🌱")+" "+escapeHtml(p.displayName)+"｜":""}${escapeHtml(h.title)}</div><div class="hist-meta">${escapeHtml(h.happenedAt)}</div><div class="hist-text">${escapeHtml(h.note||"")}</div></div>`;
-  }).join("")}</div>`;
-}
-function openAddPlant(){
-  current="plants";setTabs();selectedPlantId=null;
-  setHeader("新規株登録","マスター候補から選択");
-  renderPlantForm(null);
-}
-function openEditPlant(id){
-  selectedPlantId=id;
-  setHeader("株編集",plantById(id).displayName);
-  renderPlantForm(plantById(id));
-}
-function renderPlantForm(p){
-  const isEdit=!!p;
-  el("main").innerHTML=`<div class="card form">
-    <label>管理名</label><input id="pName" value="${escapeAttr(p?.displayName||"")}" placeholder="例：桃太郎 1号">
-    <label>アイコン</label><select id="pIcon">${["🌱","🪷","🌿","🍃","🌵"].map(x=>`<option ${p?.icon===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label>品種</label><select id="pCultivar">${state.masters.cultivars.map(x=>`<option value="${x.id}" ${p?.cultivarId===x.id?"selected":""}>${escapeHtml(x.name)}</option>`).join("")}</select>
-    <label>鉢</label><select id="pPot">${state.masters.pots.map(x=>`<option value="${x.id}" ${p?.potId===x.id?"selected":""}>${escapeHtml(x.name)}</option>`).join("")}</select>
-    <label>用土</label><select id="pMedium">${state.masters.media.map(x=>`<option value="${x.id}" ${p?.mediumId===x.id?"selected":""}>${escapeHtml(x.name)}</option>`).join("")}</select>
-    <label>置き場所</label><select id="pTray">${state.trays.map(x=>`<option value="${x.id}" ${p?.trayId===x.id?"selected":""}>${escapeHtml(x.name)}</option>`).join("")}</select>
-    <label>位置メモ</label><input id="pPosition" value="${escapeAttr(p?.position||"")}" placeholder="例：中央、端・風弱め">
-    <label>状態</label><select id="pStatus">${["良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p?.status===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label>次回確認日</label><input id="pNext" type="date" value="${escapeAttr(p?.nextCheckDate||dateOnly())}">
-    <label>メモ</label><textarea id="pMemo">${escapeHtml(p?.memo||"")}</textarea>
-    <div class="btnrow"><button class="btn" onclick="${isEdit?`savePlant('${p.id}')`:"savePlant()"}">保存</button><button class="btn ghost" onclick="${isEdit?`openDetail('${p.id}')`:"renderPlants()"}">戻る</button></div>
-    ${isEdit?`<button class="btn danger" style="margin-top:8px" onclick="archivePlant('${p.id}')">アーカイブ</button>`:""}
-  </div>
-  <div class="card notice">候補にない品種・鉢・用土・置き場所は、設定タブのマスター管理から追加してください。</div>`;
-}
-function savePlant(idToSave=null){
-  const name=el("pName").value.trim();
-  if(!name){toast("管理名は必須です");return;}
-  if(idToSave){
-    const p=plantById(idToSave);
-    Object.assign(p,{displayName:name,icon:el("pIcon").value,cultivarId:el("pCultivar").value,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status:el("pStatus").value,nextCheckDate:el("pNext").value,memo:el("pMemo").value,updatedAt:nowText()});
-    state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"株編集",happenedAt:nowText(),note:"基本情報を更新"});
-    save();toast("保存しました");openDetail(p.id);
-  }else{
-    const p={id:id("pl"),displayName:name,icon:el("pIcon").value,cultivarId:el("pCultivar").value,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status:el("pStatus").value,growthType:el("pStatus").value==="葉挿し"?"葉挿し":"通常株",lastWateredAt:"未実施",lastWaterAmountLevel:"未記録",lastWaterAmountMl:"",lastWaterMethod:"未記録",nextCheckDate:el("pNext").value,memo:el("pMemo").value,isArchived:false,createdAt:nowText(),updatedAt:nowText()};
-    state.plants.unshift(p);
-    state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"新規登録",happenedAt:nowText(),note:"株台帳に登録"});
-    save();toast("株を登録しました");openDetail(p.id);
-  }
-}
-function archivePlant(id){
-  if(!confirm("この株をアーカイブしますか？履歴は残ります。"))return;
-  const p=plantById(id);p.isArchived=true;p.updatedAt=nowText();
-  state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"アーカイブ",happenedAt:nowText(),note:"株を非表示化"});
-  save();toast("アーカイブしました");renderPlants();
-}
-function openWater(id){
-  selectedPlantId=id;const p=plantById(id);setHeader("水やり記録",p.displayName);
-  el("main").innerHTML=`<div class="card form">
-    <label>水やり日時</label><input id="wAt" value="${nowText()}">
-    <label>水やり量レベル</label><select id="wAmount">${["ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${x==="普通"?"selected":""}>${x}</option>`).join("")}</select>
-    <label>mL（任意）</label><input id="wMl" type="number" inputmode="numeric" placeholder="例：20">
-    <label>方法</label><select id="wMethod">${["上からしっかり","株元に少量","鉢縁から","底面給水","霧吹き"].map(x=>`<option>${x}</option>`).join("")}</select>
-    <label>次回確認日</label><input id="wNext" type="date" value="${dateOnly()}">
-    <label>メモ</label><textarea id="wMemo" placeholder="例：鉢底から少し排水。"></textarea>
-    <div class="btnrow"><button class="btn" onclick="saveWater()">保存</button><button class="btn ghost" onclick="openDetail('${id}')">戻る</button></div>
-  </div>`;
-}
-function saveWater(){
-  const p=plantById(selectedPlantId);
-  const at=el("wAt").value||nowText(), amount=el("wAmount").value, ml=el("wMl").value, method=el("wMethod").value, next=el("wNext").value, memo=el("wMemo").value;
-  p.lastWateredAt=at;p.lastWaterAmountLevel=amount;p.lastWaterAmountMl=ml;p.lastWaterMethod=method;p.nextCheckDate=next;p.updatedAt=nowText();
-  state.histories.unshift({id:id("his"),plantId:p.id,type:"water",title:"水やり",happenedAt:at,amountLevel:amount,amountMl:ml,method,statusAfter:p.status,note:`量：${amount}${ml?`／${ml}mL`:""}／方法：${method}。${memo||""}`});
-  save();toast("水やりを保存しました");openDetail(p.id);
-}
-function openObserve(id){
-  selectedPlantId=id;const p=plantById(id);setHeader("観察記録",p.displayName);
-  el("main").innerHTML=`<div class="card form">
-    <label>観察日時</label><input id="oAt" value="${nowText()}">
-    <label>状態</label><select id="oStatus">${["良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p.status===x?"selected":""}>${x}</option>`).join("")}</select>
-    <label>次回確認日</label><input id="oNext" type="date" value="${p.nextCheckDate||dateOnly()}">
-    <label>観察メモ</label><textarea id="oMemo" placeholder="例：今日は水やりせず、2日後に再確認。"></textarea>
-    <div class="btnrow"><button class="btn" onclick="saveObserve()">保存</button><button class="btn ghost" onclick="openDetail('${id}')">戻る</button></div>
-  </div>`;
-}
-function saveObserve(){
-  const p=plantById(selectedPlantId);
-  const at=el("oAt").value||nowText(), status=el("oStatus").value, next=el("oNext").value, memo=el("oMemo").value;
-  p.status=status;p.nextCheckDate=next;if(memo)p.memo=memo;p.updatedAt=nowText();
-  state.histories.unshift({id:id("his"),plantId:p.id,type:"observe",title:"観察",happenedAt:at,statusAfter:status,note:`状態：${status}。${memo||""}`});
-  save();toast("観察を保存しました");openDetail(p.id);
-}
-function renderRecords(){
-  setHeader("記録","水やり・観察履歴");
-  const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));
-  el("main").innerHTML=`<div class="btnrow"><button class="btn secondary" onclick="openExportPreview('histories')">履歴CSV</button><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}</div>`;
-}
-function renderPlaces(){
-  setHeader("置き場","棚・トレー");
-  el("main").innerHTML=state.trays.map(t=>{
-    const count=activePlants().filter(p=>p.trayId===t.id).length;
-    return `<div class="card"><div class="title">${escapeHtml(t.name)}</div><div class="subtitle">${escapeHtml(t.location||"")}｜乾き：${escapeHtml(t.dry||"")}｜光：${escapeHtml(t.light||"")}｜風：${escapeHtml(t.wind||"")}</div><span class="pill gray">${count}株</span><div class="btnrow"><button class="btn secondary" onclick="openMasterForm('places','${t.id}')">編集</button><button class="btn ghost" onclick="showPlacePlants('${t.id}')">株を見る</button></div></div>`;
-  }).join("")+`<div class="card"><button class="btn secondary" onclick="openMasterForm('places')">置き場所を追加</button></div>`;
-}
-function showPlacePlants(id){
-  const list=activePlants().filter(p=>p.trayId===id);
-  setHeader(mName("places",id),"置き場所内の株");
-  el("main").innerHTML=`${list.map(plantCard).join("")||`<div class="card empty-note">株がありません。</div>`}<div class="card"><button class="btn ghost" onclick="renderPlaces()">戻る</button></div>`;
-}
-function renderSettings(){
-  setHeader("設定","マスター・バックアップ");
-  const types=["cultivars","pots","media","places"];
-  el("main").innerHTML=`
-    <div class="card">
-      <div class="title">出力・バックアップ</div>
-      <div class="subtitle">CSV出力、JSONバックアップ、復元。</div>
-      <div class="btnrow"><button class="btn" onclick="openExportCenter()">出力</button><button class="btn secondary" onclick="openImport()">復元</button></div>
-    </div>
-    <div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div>
-    <div class="card">
-      <div class="title">${masterName(activeMaster)}マスター</div>
-      <div class="subtitle">入力候補として使う基礎データ。</div>
-      <button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button>
-    </div>
-    <div class="card">${masterRows(activeMaster)}</div>
-    <div class="card"><button class="btn danger" onclick="resetConfirm()">データ初期化</button></div>`;
-}
-function masterRows(type){
-  const arr=mList(type);
-  if(!arr.length)return `<div class="empty-note">未登録です。</div>`;
-  return arr.map(item=>{
-    const count=usedCount(type,item.id);
-    return `<div class="master-row">
-      <div class="grow"><div class="master-name">${escapeHtml(item.name)}</div><div class="master-meta">使用中：${count}件｜${escapeHtml(item.note||item.location||"メモなし")}</div></div>
-      <button class="iconbtn" onclick="openMasterForm('${type}','${item.id}')">編集</button>
-      <button class="iconbtn danger" onclick="deleteMaster('${type}','${item.id}')">削除</button>
-    </div>`;
-  }).join("");
-}
-function openMasterForm(type,idToEdit=null){
-  activeMaster=type;editingMasterId=idToEdit;
-  const item=idToEdit?mList(type).find(x=>x.id===idToEdit):null;
-  setHeader(`${masterName(type)}${item?"編集":"追加"}`,"マスター管理");
-  if(type==="places"){
-    el("main").innerHTML=`<div class="card form">
-      <label>置き場所名</label><input id="mName" value="${escapeAttr(item?.name||"")}" placeholder="例：A-25Sトレー2">
-      <label>種類</label><input id="mType" value="${escapeAttr(item?.type||"")}" placeholder="例：A-25S 35個トレー">
-      <label>設置場所</label><input id="mLocation" value="${escapeAttr(item?.location||"")}" placeholder="例：南向き窓辺">
-      <label>乾きやすさ</label><select id="mDry">${["早め","普通","遅め"].map(x=>`<option ${item?.dry===x?"selected":""}>${x}</option>`).join("")}</select>
-      <label>光</label><select id="mLight">${["強め","中程度","弱め"].map(x=>`<option ${item?.light===x?"selected":""}>${x}</option>`).join("")}</select>
-      <label>風</label><select id="mWind">${["弱風あり","弱め","風強め","風なし"].map(x=>`<option ${item?.wind===x?"selected":""}>${x}</option>`).join("")}</select>
-      <label>メモ</label><textarea id="mNote">${escapeHtml(item?.note||"")}</textarea>
-      <div class="btnrow"><button class="btn" onclick="saveMaster('${type}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div>
-    </div>`;
-  }else{
-    el("main").innerHTML=`<div class="card form">
-      <label>${masterName(type)}名</label><input id="mName" value="${escapeAttr(item?.name||"")}" placeholder="例：名称を入力">
-      <label>メモ</label><textarea id="mNote">${escapeHtml(item?.note||"")}</textarea>
-      <div class="btnrow"><button class="btn" onclick="saveMaster('${type}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div>
-    </div>`;
-  }
-}
-function saveMaster(type){
-  const name=el("mName").value.trim();
-  if(!name){toast("名称は必須です");return;}
-  if(mList(type).some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.id!==editingMasterId)){toast("同名マスターがあります");return;}
-  if(type==="places"){
-    if(editingMasterId){
-      const item=state.trays.find(x=>x.id===editingMasterId);
-      Object.assign(item,{name,type:el("mType").value,location:el("mLocation").value,dry:el("mDry").value,light:el("mLight").value,wind:el("mWind").value,note:el("mNote").value});
-    }else{
-      state.trays.push({id:id("tray"),name,type:el("mType").value,location:el("mLocation").value,dry:el("mDry").value,light:el("mLight").value,wind:el("mWind").value,note:el("mNote").value});
-    }
-  }else{
-    if(editingMasterId){
-      const item=state.masters[type].find(x=>x.id===editingMasterId);
-      item.name=name;item.note=el("mNote").value;
-    }else{
-      const prefix={cultivars:"cv",pots:"pot",media:"med"}[type];
-      state.masters[type].push({id:id(prefix),name,note:el("mNote").value});
-    }
-  }
-  save();toast("保存しました");go("settings");
-}
-function deleteMaster(type,itemId){
-  const count=usedCount(type,itemId);
-  if(count>0){toast(`使用中のため削除できません（${count}件）`);return;}
-  if(!confirm("削除しますか？"))return;
-  if(type==="places")state.trays=state.trays.filter(x=>x.id!==itemId);
-  else state.masters[type]=state.masters[type].filter(x=>x.id!==itemId);
-  save();toast("削除しました");renderSettings();
-}
-function csvEscape(v){
-  v=(v??"").toString();
-  if(/[",\n]/.test(v))return `"${v.replace(/"/g,'""')}"`;
-  return v;
-}
-function makeCSV(kind){
-  let rows=[];
-  if(kind==="plants"){
-    rows=[["id","管理名","品種","状態","個体区分","鉢","用土","置き場所","位置","最終水やり","水やり量","mL","方法","次回確認","メモ"]];
-    activePlants().forEach(p=>rows.push([p.id,p.displayName,mName("cultivars",p.cultivarId),p.status,p.growthType,mName("pots",p.potId),mName("media",p.mediumId),mName("places",p.trayId),p.position,p.lastWateredAt,p.lastWaterAmountLevel,p.lastWaterAmountMl,p.lastWaterMethod,p.nextCheckDate,p.memo]));
-  }
-  if(kind==="histories"){
-    rows=[["plant_id","管理名","品種","種別","タイトル","日時","内容"]];
-    state.histories.forEach(h=>{const p=plantById(h.plantId)||{};rows.push([h.plantId,p.displayName||"",p.cultivarId?mName("cultivars",p.cultivarId):"",h.type,h.title,h.happenedAt,h.note])});
-  }
-  if(kind==="backup"){
-    return JSON.stringify(state,null,2);
-  }
-  return rows.map(r=>r.map(csvEscape).join(",")).join("\n");
-}
-function openExportCenter(){
-  setHeader("出力・バックアップ","CSV / JSON");
-  el("main").innerHTML=`<div class="card notice">CSVは確認・分析用、JSONは復元用です。Safariではプレビューをコピーして保存する運用になります。</div>
-    <div class="card">
-      <div class="export-row"><div class="grow"><div class="master-name">株一覧CSV</div><div class="master-meta">株の現状一覧</div></div><button class="iconbtn" onclick="openExportPreview('plants')">表示</button></div>
-      <div class="export-row"><div class="grow"><div class="master-name">履歴CSV</div><div class="master-meta">水やり・観察履歴</div></div><button class="iconbtn" onclick="openExportPreview('histories')">表示</button></div>
-      <div class="export-row"><div class="grow"><div class="master-name">JSONバックアップ</div><div class="master-meta">完全復元用</div></div><button class="iconbtn" onclick="openExportPreview('backup')">表示</button></div>
-    </div>
-    <div class="card"><button class="btn ghost" onclick="go('settings')">戻る</button></div>`;
-}
-function openExportPreview(kind){
-  const label={plants:"株一覧CSV",histories:"履歴CSV",backup:"JSONバックアップ"}[kind];
-  const data=makeCSV(kind);
-  setHeader(label,"コピーして保存");
-  el("main").innerHTML=`<div class="card">
-    <div class="title">${label}</div>
-    <div class="subtitle">下の内容を全選択して、メモ・ファイル・自分宛メール等に保存してください。</div>
-    <div class="btnrow"><button class="btn" onclick="copyText()">コピー</button><button class="btn ghost" onclick="openExportCenter()">戻る</button></div>
-  </div>
-  <textarea id="exportText" class="preview" style="width:100%;min-height:360px">${escapeHtml(data)}</textarea>`;
-}
-async function copyText(){
-  const txt=el("exportText").value;
-  try{await navigator.clipboard.writeText(txt);toast("コピーしました")}
-  catch{el("exportText").select();document.execCommand("copy");toast("コピーしました")}
-}
-function openImport(){
-  setHeader("JSON復元","バックアップから復元");
-  el("main").innerHTML=`<div class="card form">
-    <div class="notice">JSONバックアップを貼り付けて検証します。復元すると現在データを上書きします。</div>
-    <label>JSON</label><textarea id="importText" placeholder="JSONバックアップを貼り付け"></textarea>
-    <div id="importResult"></div>
-    <div class="btnrow"><button class="btn" onclick="validateImport()">検証</button><button class="btn ghost" onclick="go('settings')">戻る</button></div>
-  </div>`;
-}
-function validateImport(){
-  try{
-    const obj=JSON.parse(el("importText").value);
-    if(!obj.masters||!obj.trays||!obj.plants||!obj.histories){el("importResult").innerHTML=`<div class="notice">必要なキーが不足しています。</div>`;return;}
-    el("importResult").innerHTML=`<div class="notice">形式OK。株 ${obj.plants.length}件、履歴 ${obj.histories.length}件。<br><br><button class="btn danger" onclick="restoreImport()">このデータで復元</button></div>`;
-  }catch(e){el("importResult").innerHTML=`<div class="notice">JSONとして読み込めません。</div>`}
-}
-function restoreImport(){
-  if(!confirm("現在データを上書きします。よろしいですか？"))return;
-  state=JSON.parse(el("importText").value);
-  save();toast("復元しました");go("home");
-}
-function escapeHtml(s){return (s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
-function escapeAttr(s){return escapeHtml(s).replace(/"/g,"&quot;")}
-if("serviceWorker" in navigator){navigator.serviceWorker.register("./service-worker.js").catch(()=>{});}
-load();go("home");
+const STORAGE_KEY="echeveria_pwa_v2_data";let state=null,current="home",filter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null;
+function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v2",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準"},{id:pot2,name:"小型仮鉢",note:"発根待ち"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用"}],media:[{id:med1,name:"チャコボール",note:"標準用土"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用"}]},trays:[{id:tray1,name:"A-25Sトレー1",type:"A-25S 35個トレー",location:"南向き窓辺",dry:"普通",light:"強め",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",type:"仮置き",location:"窓辺から少し離す",dry:"遅め",light:"中程度",wind:"弱め",note:"水を入れすぎない"}],plants:[],histories:[],exportLogs:[]}}
+function migrate(d){d.version="pwa-v2";d.plants=(d.plants||[]).map(p=>({...p,acquiredDate:p.acquiredDate||"",autoCheckEnabled:p.autoCheckEnabled!==false,autoCheckBaseDays:p.autoCheckBaseDays||5,lastWateredAt:p.lastWateredAt||"未実施",lastWaterAmountLevel:p.lastWaterAmountLevel||"未記録",lastWaterAmountMl:p.lastWaterAmountMl||"",lastWaterMethod:p.lastWaterMethod||"未記録"}));d.histories=d.histories||[];d.exportLogs=d.exportLogs||[];return d}
+function load(){const raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem("echeveria_pwa_v1_data");if(raw){try{state=migrate(JSON.parse(raw));save()}catch{state=defaultData();save()}}else{state=defaultData();save()}}function save(){state.updatedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function el(i){return document.getElementById(i)}function toast(m){const t=el("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v2"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}function go(s){current=s;setTabs();({home:renderHome,plants:renderPlants,records:renderRecords,places:renderPlaces,settings:renderSettings}[s])()}
+function mList(t){return t==="places"?state.trays:state.masters[t]}function mName(t,i){return (mList(t).find(x=>x.id===i)||{}).name||"未設定"}function masterName(t){return{cultivars:"品種",pots:"鉢",media:"用土",places:"置き場所"}[t]}function plantById(i){return state.plants.find(p=>p.id===i)}function activePlants(){return state.plants.filter(p=>!p.isArchived)}function usedCount(t,i){return activePlants().filter(p=>t==="cultivars"?p.cultivarId===i:t==="pots"?p.potId===i:t==="media"?p.mediumId===i:p.trayId===i).length}
+function suggestDays(status,growth,potId,trayId){let d=5;if(status==="葉挿し"||growth==="葉挿し"||status==="発根待ち")d=2;if(status==="蒸れ注意")d=1;if(status==="植え替え直後")d=3;if(status==="休眠気味")d=7;const tr=state?.trays?.find(x=>x.id===trayId);if(tr?.dry==="早め")d=Math.max(1,d-1);if(tr?.dry==="遅め")d+=1;const pot=state?.masters?.pots?.find(x=>x.id===potId);if(pot?.name?.includes("浅鉢"))d=Math.max(1,d-1);return d}function dueLevel(p){const t=dateOnly();return p.nextCheckDate<t?"期限超過":p.nextCheckDate===t?"本日確認":""}function statusClass(s){return s==="要観察"||s==="水切れ気味"?"warn":(s==="葉挿し"||s==="発根待ち"||s==="蒸れ注意")?"danger":""}
+function esc(s){return (s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}function attr(s){return esc(s).replace(/"/g,"&quot;")}
+function plantCard(p){return `<div class="card plant-card" onclick="openDetail('${p.id}')"><div class="avatar">${p.icon||"🌱"}</div><div class="grow"><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}<br>お迎え：${esc(p.acquiredDate||"未記録")}｜最終水やり：${esc(p.lastWateredAt||"未実施")}｜量：${esc(p.lastWaterAmountLevel||"未記録")}${p.lastWaterAmountMl?`（${esc(p.lastWaterAmountMl)}mL）`:""}</div><span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">次回 ${esc(p.nextCheckDate||"未設定")}</span>${dueLevel(p)?`<span class="pill warn">${dueLevel(p)}</span>`:""}</div></div>`}
+function renderHome(){setHeader("ホーム","画面内通知・今日見る株");const today=dateOnly(),due=activePlants().filter(p=>(p.nextCheckDate&&p.nextCheckDate<=today)||p.status!=="良好"),over=activePlants().filter(p=>p.nextCheckDate&&p.nextCheckDate<today),tod=activePlants().filter(p=>p.nextCheckDate===today);el("main").innerHTML=`${over.length||tod.length?`<div class="card notice">画面内通知：期限超過 ${over.length}株／本日確認 ${tod.length}株。</div>`:""}<div class="section-title">今日確認する株 <span class="small">${due.length}件</span></div>${due.map(plantCard).join("")||`<div class="card empty-note">今日の確認対象はありません。</div>`}<div class="section-title">操作</div><div class="card"><button class="btn" onclick="openAddPlant()">新規株を登録</button><div class="btnrow"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button><button class="btn secondary" onclick="go('settings')">マスター管理</button></div></div><div class="section-title">データ状況</div><div class="card"><div class="kv"><div class="k">株数</div><div>${activePlants().length}株</div></div><div class="kv"><div class="k">履歴</div><div>${state.histories.length}件</div></div><div class="kv"><div class="k">最終更新</div><div>${esc(state.updatedAt||"")}</div></div></div><div class="section-title">最近の記録</div><div class="card">${historyHtml(state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,5))}</div>`}
+function renderPlants(){setHeader("株一覧","検索・絞り込み");const chips=["すべて","良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意"];const list=activePlants().filter(p=>filter==="すべて"||p.status===filter);el("main").innerHTML=`<input class="search" placeholder="管理名・品種名・置き場所で検索" oninput="searchPlants(this.value)"><div class="chips">${chips.map(c=>`<div class="chip ${c===filter?'active':''}" onclick="filter='${c}';renderPlants()">${c}</div>`).join("")}</div><div class="btnrow"><button class="btn secondary" onclick="openAddPlant()">株を登録</button><button class="btn secondary" onclick="openExportPreview('plants')">CSV</button></div><div id="plantList">${list.map(plantCard).join("")||`<div class="card empty-note">株がありません。</div>`}</div>`}
+function searchPlants(q){q=q.trim();const list=activePlants().filter(p=>(filter==="すべて"||p.status===filter)&&(p.displayName.includes(q)||mName("cultivars",p.cultivarId).includes(q)||mName("places",p.trayId).includes(q)));el("plantList").innerHTML=list.map(plantCard).join("")||`<div class="card empty-note">該当する株がありません。</div>`}
+function openDetail(pid){selectedPlantId=pid;current="plants";setTabs();const p=plantById(pid);setHeader(p.displayName,mName("cultivars",p.cultivarId));el("main").innerHTML=`<div class="card"><div style="font-size:82px;text-align:center">${p.icon||"🌱"}</div><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}</div><span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">${esc(mName("pots",p.potId))}</span><span class="pill gray">${esc(mName("media",p.mediumId))}</span><div class="kv"><div class="k">お迎え日</div><div>${esc(p.acquiredDate||"未記録")}</div></div><div class="kv"><div class="k">最終水やり</div><div>${esc(p.lastWateredAt||"未実施")}</div></div><div class="kv"><div class="k">水やり量</div><div>${esc(p.lastWaterAmountLevel||"未記録")}${p.lastWaterAmountMl?`（${esc(p.lastWaterAmountMl)}mL）`:""}／${esc(p.lastWaterMethod||"未記録")}</div></div><div class="kv"><div class="k">次回確認</div><div>${esc(p.nextCheckDate||"未設定")} ${p.autoCheckEnabled?`（自動目安：${p.autoCheckBaseDays||"?"}日）`:""}</div></div><div class="kv"><div class="k">メモ</div><div>${esc(p.memo||"—")}</div></div><div class="btnrow three"><button class="btn" onclick="openWater('${p.id}')">水やり</button><button class="btn secondary" onclick="openObserve('${p.id}')">観察</button><button class="btn ghost" onclick="openEditPlant('${p.id}')">編集</button></div></div><div class="section-title">履歴</div><div class="card">${historyHtml(state.histories.filter(h=>h.plantId===p.id).sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,8))}</div>`}
+function historyHtml(list){if(!list.length)return `<div class="empty-note">履歴はありません。</div>`;return `<div class="history">${list.map(h=>{const p=plantById(h.plantId);return `<div class="hist-item"><div class="hist-title">${p?(p.icon||"🌱")+" "+esc(p.displayName)+"｜":""}${esc(h.title)}</div><div class="hist-meta">${esc(h.happenedAt)}</div><div class="hist-text">${esc(h.note||"")}</div></div>`}).join("")}</div>`}
+function openAddPlant(){current="plants";setTabs();selectedPlantId=null;setHeader("新規株登録","品種追加・お迎え日・最終水やり");renderPlantForm(null)}function openEditPlant(pid){selectedPlantId=pid;setHeader("株編集",plantById(pid).displayName);renderPlantForm(plantById(pid))}
+function renderPlantForm(p){const edit=!!p;el("main").innerHTML=`<div class="card form"><label>管理名</label><input id="pName" value="${attr(p?.displayName||"")}" placeholder="例：桃太郎 1号"><label>アイコン</label><select id="pIcon">${["🌱","🪷","🌿","🍃","🌵"].map(x=>`<option ${p?.icon===x?"selected":""}>${x}</option>`).join("")}</select><label>品種</label><select id="pCultivar">${state.masters.cultivars.map(x=>`<option value="${x.id}" ${p?.cultivarId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}<option value="__new__">＋品種を新規追加</option></select><input id="pNewCultivar" placeholder="新しい品種名（例：ラウリンゼ）" style="margin-top:8px;display:none"><textarea id="pNewCultivarNote" placeholder="品種メモ（任意）" style="margin-top:8px;display:none;min-height:60px"></textarea><label>鉢</label><select id="pPot" onchange="refreshSuggestedCheck()">${state.masters.pots.map(x=>`<option value="${x.id}" ${p?.potId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select><label>用土</label><select id="pMedium">${state.masters.media.map(x=>`<option value="${x.id}" ${p?.mediumId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select><label>置き場所</label><select id="pTray" onchange="refreshSuggestedCheck()">${state.trays.map(x=>`<option value="${x.id}" ${p?.trayId===x.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select><label>位置メモ</label><input id="pPosition" value="${attr(p?.position||"")}" placeholder="例：中央"><label>状態</label><select id="pStatus" onchange="refreshSuggestedCheck()">${["良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p?.status===x?"selected":""}>${x}</option>`).join("")}</select><label>お迎え日</label><input id="pAcquired" type="date" value="${attr(p?.acquiredDate||dateOnly())}" onchange="refreshSuggestedCheck()"><label>最終水やり日</label><input id="pLastWater" type="date" value="${attr((p?.lastWateredAt&&p.lastWateredAt!=="未実施")?p.lastWateredAt.slice(0,10):"")}" onchange="refreshSuggestedCheck()"><label>最終水やり量</label><select id="pLastAmount">${["未記録","なし","ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${p?.lastWaterAmountLevel===x?"selected":""}>${x}</option>`).join("")}</select><label>最終水やりmL（任意）</label><input id="pLastMl" type="number" inputmode="numeric" value="${attr(p?.lastWaterAmountMl||"")}"><label>最終水やり方法</label><select id="pLastMethod">${["未記録","なし","上からしっかり","株元に少量","鉢縁から","底面給水","霧吹き"].map(x=>`<option ${p?.lastWaterMethod===x?"selected":""}>${x}</option>`).join("")}</select><label>自動確認目安</label><select id="pAutoCheck" onchange="refreshSuggestedCheck()"><option value="on" ${p?.autoCheckEnabled!==false?"selected":""}>自動で次回確認日を提案</option><option value="off" ${p?.autoCheckEnabled===false?"selected":""}>手動で指定</option></select><label>確認目安日数</label><input id="pAutoDays" type="number" inputmode="numeric" value="${attr(p?.autoCheckBaseDays||"")}" placeholder="空欄なら自動" onchange="refreshSuggestedCheck()"><label>次回確認日</label><input id="pNext" type="date" value="${attr(p?.nextCheckDate||dateOnly())}"><div class="notice">通知はホーム画面内に表示します。期限超過・本日確認の株数がホームに出ます。</div><label>メモ</label><textarea id="pMemo">${esc(p?.memo||"")}</textarea><div class="btnrow"><button class="btn" onclick="${edit?`savePlant('${p.id}')`:"savePlant()"}">保存</button><button class="btn ghost" onclick="${edit?`openDetail('${p.id}')`:"renderPlants()"}">戻る</button></div>${edit?`<button class="btn danger" style="margin-top:8px" onclick="archivePlant('${p.id}')">アーカイブ</button>`:""}</div><div class="card notice">品種欄で「＋品種を新規追加」を選ぶと、この登録と同時に品種マスターへ追加します。</div>`;el("pCultivar").addEventListener("change",()=>{const n=el("pCultivar").value==="__new__";el("pNewCultivar").style.display=n?"block":"none";el("pNewCultivarNote").style.display=n?"block":"none"});refreshSuggestedCheck()}
+function refreshSuggestedCheck(){if(!el("pStatus")||!el("pNext")||el("pAutoCheck")?.value==="off")return;let days=Number(el("pAutoDays")?.value||0);const st=el("pStatus").value,g=st==="葉挿し"?"葉挿し":"通常株";if(!days)days=suggestDays(st,g,el("pPot").value,el("pTray").value);const base=el("pLastWater").value||el("pAcquired").value||dateOnly();el("pNext").value=addDays(base,days)}
+function cultivarFromForm(){const v=el("pCultivar").value;if(v!=="__new__")return v;const name=el("pNewCultivar").value.trim();if(!name){toast("新しい品種名を入力してください");return null}const ex=state.masters.cultivars.find(x=>x.name.toLowerCase()===name.toLowerCase());if(ex)return ex.id;const item={id:id("cv"),name,note:el("pNewCultivarNote").value};state.masters.cultivars.push(item);return item.id}
+function savePlant(pid=null){const name=el("pName").value.trim();if(!name){toast("管理名は必須です");return}const cultivarId=cultivarFromForm();if(!cultivarId)return;const lastDate=el("pLastWater").value,lastWater=lastDate?`${lastDate} 00:00`:"未実施",status=el("pStatus").value,autoDays=Number(el("pAutoDays").value||0)||suggestDays(status,status==="葉挿し"?"葉挿し":"通常株",el("pPot").value,el("pTray").value);if(pid){const p=plantById(pid);Object.assign(p,{displayName:name,icon:el("pIcon").value,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType:status==="葉挿し"?"葉挿し":(p.growthType||"通常株"),acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterAmountMl:el("pLastMl").value,lastWaterMethod:el("pLastMethod").value,autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,updatedAt:nowText()});state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"株編集",happenedAt:nowText(),note:"基本情報を更新"});save();toast("保存しました");openDetail(p.id)}else{const p={id:id("pl"),displayName:name,icon:el("pIcon").value,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType:status==="葉挿し"?"葉挿し":"通常株",acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterAmountMl:el("pLastMl").value,lastWaterMethod:el("pLastMethod").value,autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,isArchived:false,createdAt:nowText(),updatedAt:nowText()};state.plants.unshift(p);state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"新規登録",happenedAt:nowText(),note:`お迎え日：${p.acquiredDate||"未記録"}。次回確認：${p.nextCheckDate}`});save();toast("株を登録しました");openDetail(p.id)}}
+function archivePlant(pid){if(!confirm("この株をアーカイブしますか？"))return;const p=plantById(pid);p.isArchived=true;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"アーカイブ",happenedAt:nowText(),note:"株を非表示化"});save();toast("アーカイブしました");renderPlants()}
+function openWater(pid){selectedPlantId=pid;const p=plantById(pid);setHeader("水やり記録",p.displayName);el("main").innerHTML=`<div class="card form"><label>水やり日時</label><input id="wAt" value="${nowText()}"><label>水やり量レベル</label><select id="wAmount">${["ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${x==="普通"?"selected":""}>${x}</option>`).join("")}</select><label>mL（任意）</label><input id="wMl" type="number" inputmode="numeric" placeholder="例：20"><label>方法</label><select id="wMethod">${["上からしっかり","株元に少量","鉢縁から","底面給水","霧吹き"].map(x=>`<option>${x}</option>`).join("")}</select><label>次回確認日</label><input id="wNext" type="date" value="${p.autoCheckEnabled?addDays(dateOnly(),p.autoCheckBaseDays||suggestDays(p.status,p.growthType,p.potId,p.trayId)):dateOnly()}"><div class="small">自動目安：${p.autoCheckEnabled?(p.autoCheckBaseDays||"?")+"日後":"手動"}。必要なら変更できます。</div><label>メモ</label><textarea id="wMemo"></textarea><div class="btnrow"><button class="btn" onclick="saveWater()">保存</button><button class="btn ghost" onclick="openDetail('${pid}')">戻る</button></div></div>`}
+function saveWater(){const p=plantById(selectedPlantId),at=el("wAt").value||nowText(),amount=el("wAmount").value,ml=el("wMl").value,method=el("wMethod").value,next=el("wNext").value,memo=el("wMemo").value;p.lastWateredAt=at;p.lastWaterAmountLevel=amount;p.lastWaterAmountMl=ml;p.lastWaterMethod=method;p.nextCheckDate=next;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"water",title:"水やり",happenedAt:at,amountLevel:amount,amountMl:ml,method,statusAfter:p.status,note:`量：${amount}${ml?`／${ml}mL`:""}／方法：${method}。${memo||""}`});save();toast("水やりを保存しました");openDetail(p.id)}
+function openObserve(pid){selectedPlantId=pid;const p=plantById(pid);setHeader("観察記録",p.displayName);el("main").innerHTML=`<div class="card form"><label>観察日時</label><input id="oAt" value="${nowText()}"><label>状態</label><select id="oStatus">${["良好","要観察","発根待ち","葉挿し","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p.status===x?"selected":""}>${x}</option>`).join("")}</select><label>次回確認日</label><input id="oNext" type="date" value="${p.nextCheckDate||dateOnly()}"><label>観察メモ</label><textarea id="oMemo"></textarea><div class="btnrow"><button class="btn" onclick="saveObserve()">保存</button><button class="btn ghost" onclick="openDetail('${pid}')">戻る</button></div></div>`}
+function saveObserve(){const p=plantById(selectedPlantId),at=el("oAt").value||nowText(),status=el("oStatus").value,next=el("oNext").value,memo=el("oMemo").value;p.status=status;p.nextCheckDate=next;if(memo)p.memo=memo;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"observe",title:"観察",happenedAt:at,statusAfter:status,note:`状態：${status}。${memo||""}`});save();toast("観察を保存しました");openDetail(p.id)}
+function renderRecords(){setHeader("記録","水やり・観察履歴");const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));el("main").innerHTML=`<div class="btnrow"><button class="btn secondary" onclick="openExportPreview('histories')">履歴CSV</button><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}</div>`}
+function renderPlaces(){setHeader("置き場","棚・トレー");el("main").innerHTML=state.trays.map(t=>{const count=activePlants().filter(p=>p.trayId===t.id).length;return `<div class="card"><div class="title">${esc(t.name)}</div><div class="subtitle">${esc(t.location||"")}｜乾き：${esc(t.dry||"")}｜光：${esc(t.light||"")}｜風：${esc(t.wind||"")}</div><span class="pill gray">${count}株</span><div class="btnrow"><button class="btn secondary" onclick="openMasterForm('places','${t.id}')">編集</button><button class="btn ghost" onclick="showPlacePlants('${t.id}')">株を見る</button></div></div>`}).join("")+`<div class="card"><button class="btn secondary" onclick="openMasterForm('places')">置き場所を追加</button></div>`}
+function showPlacePlants(tid){const list=activePlants().filter(p=>p.trayId===tid);setHeader(mName("places",tid),"置き場所内の株");el("main").innerHTML=`${list.map(plantCard).join("")||`<div class="card empty-note">株がありません。</div>`}<div class="card"><button class="btn ghost" onclick="renderPlaces()">戻る</button></div>`}
+function renderSettings(){setHeader("設定","マスター・バックアップ");const types=["cultivars","pots","media","places"];el("main").innerHTML=`<div class="card"><div class="title">出力・バックアップ</div><div class="subtitle">CSV出力、JSONバックアップ、復元。</div><div class="btnrow"><button class="btn" onclick="openExportCenter()">出力</button><button class="btn secondary" onclick="openImport()">復元</button></div></div><div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div><div class="card"><div class="title">${masterName(activeMaster)}マスター</div><button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button></div><div class="card">${masterRows(activeMaster)}</div><div class="card"><button class="btn danger" onclick="resetConfirm()">データ初期化</button></div>`}
+function masterRows(t){const arr=mList(t);return arr.map(item=>{const count=usedCount(t,item.id);return `<div class="master-row"><div class="grow"><div class="master-name">${esc(item.name)}</div><div class="master-meta">使用中：${count}件｜${esc(item.note||item.location||"メモなし")}</div></div><button class="iconbtn" onclick="openMasterForm('${t}','${item.id}')">編集</button><button class="iconbtn danger" onclick="deleteMaster('${t}','${item.id}')">削除</button></div>`}).join("")||`<div class="empty-note">未登録です。</div>`}
+function openMasterForm(t,i=null){activeMaster=t;editingMasterId=i;const item=i?mList(t).find(x=>x.id===i):null;setHeader(`${masterName(t)}${item?"編集":"追加"}`,"マスター管理");if(t==="places")el("main").innerHTML=`<div class="card form"><label>置き場所名</label><input id="mName" value="${attr(item?.name||"")}"><label>種類</label><input id="mType" value="${attr(item?.type||"")}"><label>設置場所</label><input id="mLocation" value="${attr(item?.location||"")}"><label>乾きやすさ</label><select id="mDry">${["早め","普通","遅め"].map(x=>`<option ${item?.dry===x?"selected":""}>${x}</option>`).join("")}</select><label>光</label><select id="mLight">${["強め","中程度","弱め"].map(x=>`<option ${item?.light===x?"selected":""}>${x}</option>`).join("")}</select><label>風</label><select id="mWind">${["弱風あり","弱め","風強め","風なし"].map(x=>`<option ${item?.wind===x?"selected":""}>${x}</option>`).join("")}</select><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`;else el("main").innerHTML=`<div class="card form"><label>${masterName(t)}名</label><input id="mName" value="${attr(item?.name||"")}"><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`}
+function saveMaster(t){const name=el("mName").value.trim();if(!name){toast("名称は必須です");return}if(mList(t).some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.id!==editingMasterId)){toast("同名マスターがあります");return}if(t==="places"){if(editingMasterId){Object.assign(state.trays.find(x=>x.id===editingMasterId),{name,type:el("mType").value,location:el("mLocation").value,dry:el("mDry").value,light:el("mLight").value,wind:el("mWind").value,note:el("mNote").value})}else state.trays.push({id:id("tray"),name,type:el("mType").value,location:el("mLocation").value,dry:el("mDry").value,light:el("mLight").value,wind:el("mWind").value,note:el("mNote").value})}else{if(editingMasterId){const it=state.masters[t].find(x=>x.id===editingMasterId);it.name=name;it.note=el("mNote").value}else state.masters[t].push({id:id({cultivars:"cv",pots:"pot",media:"med"}[t]),name,note:el("mNote").value})}save();toast("保存しました");go("settings")}
+function deleteMaster(t,i){const count=usedCount(t,i);if(count>0){toast(`使用中のため削除できません（${count}件）`);return}if(!confirm("削除しますか？"))return;if(t==="places")state.trays=state.trays.filter(x=>x.id!==i);else state.masters[t]=state.masters[t].filter(x=>x.id!==i);save();toast("削除しました");renderSettings()}
+function csvEsc(v){v=(v??"").toString();return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v}function makeCSV(k){if(k==="backup")return JSON.stringify(state,null,2);let rows=[];if(k==="plants"){rows=[["id","管理名","品種","状態","鉢","用土","置き場所","位置","お迎え日","最終水やり","水やり量","mL","方法","次回確認","自動確認","目安日数","メモ"]];activePlants().forEach(p=>rows.push([p.id,p.displayName,mName("cultivars",p.cultivarId),p.status,mName("pots",p.potId),mName("media",p.mediumId),mName("places",p.trayId),p.position,p.acquiredDate,p.lastWateredAt,p.lastWaterAmountLevel,p.lastWaterAmountMl,p.lastWaterMethod,p.nextCheckDate,p.autoCheckEnabled?"ON":"OFF",p.autoCheckBaseDays,p.memo]))}if(k==="histories"){rows=[["plant_id","管理名","品種","種別","タイトル","日時","内容"]];state.histories.forEach(h=>{const p=plantById(h.plantId)||{};rows.push([h.plantId,p.displayName||"",p.cultivarId?mName("cultivars",p.cultivarId):"",h.type,h.title,h.happenedAt,h.note])})}return rows.map(r=>r.map(csvEsc).join(",")).join("\n")}
+function openExportCenter(){setHeader("出力・バックアップ","CSV / JSON");el("main").innerHTML=`<div class="card notice">CSVは確認・分析用、JSONは復元用です。</div><div class="card"><div class="export-row"><div class="grow"><div class="master-name">株一覧CSV</div></div><button class="iconbtn" onclick="openExportPreview('plants')">表示</button></div><div class="export-row"><div class="grow"><div class="master-name">履歴CSV</div></div><button class="iconbtn" onclick="openExportPreview('histories')">表示</button></div><div class="export-row"><div class="grow"><div class="master-name">JSONバックアップ</div></div><button class="iconbtn" onclick="openExportPreview('backup')">表示</button></div></div><div class="card"><button class="btn ghost" onclick="go('settings')">戻る</button></div>`}
+function openExportPreview(k){const label={plants:"株一覧CSV",histories:"履歴CSV",backup:"JSONバックアップ"}[k],data=makeCSV(k);setHeader(label,"コピーして保存");el("main").innerHTML=`<div class="card"><div class="title">${label}</div><div class="subtitle">下の内容をコピーして保存してください。</div><div class="btnrow"><button class="btn" onclick="copyText()">コピー</button><button class="btn ghost" onclick="openExportCenter()">戻る</button></div></div><textarea id="exportText" class="preview" style="width:100%;min-height:360px">${esc(data)}</textarea>`}
+async function copyText(){const txt=el("exportText").value;try{await navigator.clipboard.writeText(txt);toast("コピーしました")}catch{el("exportText").select();document.execCommand("copy");toast("コピーしました")}}
+function openImport(){setHeader("JSON復元","バックアップから復元");el("main").innerHTML=`<div class="card form"><div class="notice">JSONを貼り付けて検証します。復元すると現在データを上書きします。</div><label>JSON</label><textarea id="importText"></textarea><div id="importResult"></div><div class="btnrow"><button class="btn" onclick="validateImport()">検証</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`}
+function validateImport(){try{const obj=JSON.parse(el("importText").value);if(!obj.masters||!obj.trays||!obj.plants||!obj.histories){el("importResult").innerHTML=`<div class="notice">必要なキーが不足しています。</div>`;return}el("importResult").innerHTML=`<div class="notice">形式OK。株 ${obj.plants.length}件、履歴 ${obj.histories.length}件。<br><br><button class="btn danger" onclick="restoreImport()">このデータで復元</button></div>`}catch{el("importResult").innerHTML=`<div class="notice">JSONとして読み込めません。</div>`}}
+function restoreImport(){if(!confirm("現在データを上書きします。よろしいですか？"))return;state=migrate(JSON.parse(el("importText").value));save();toast("復元しました");go("home")}
+function resetConfirm(){if(confirm("初期化します。JSONバックアップを取ってから実行してください。")){state=defaultData();save();toast("初期化しました");go("home")}}
+if("serviceWorker"in navigator){navigator.serviceWorker.register("./service-worker.js").catch(()=>{})}load();go("home");
 </script>
 </body>
 </html>
