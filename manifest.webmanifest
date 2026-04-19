@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "新規株保存不具合を修正したエケベリア管理PWA v19",
+  "description": "事故防止と表示整合性を強化したエケベリア管理PWA v20",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
