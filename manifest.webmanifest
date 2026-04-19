@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "更新ボタンを非絵文字化したエケベリア管理PWA v16",
+  "description": "バックアップ状況と標準ジョウロアイコンを含むエケベリア管理PWA v18",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
