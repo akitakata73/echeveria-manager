@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "エケベリアの鉢・用土補正つき次回確認日を管理する個人用PWA v9",
+  "description": "エケベリアの基本日数調整と要観察自動化を含む個人用PWA v10",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
