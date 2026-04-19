@@ -1,0 +1,23 @@
+{
+  "name": "エケベリア管理",
+  "short_name": "エケベリア",
+  "description": "エケベリアの水やり・観察・株台帳を管理する個人用PWA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f2",
+  "theme_color": "#4b7f52",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
