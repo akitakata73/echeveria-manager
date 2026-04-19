@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "エケベリア管理の初期化ボタンを非表示にした個人用PWA v15",
+  "description": "更新ボタンを非絵文字化したエケベリア管理PWA v16",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
