@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "エケベリアの入力保護と更新導線を整理した個人用PWA v13",
+  "description": "エケベリアのマスター選択肢を使用数順に整理する個人用PWA v14",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
