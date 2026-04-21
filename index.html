@@ -32,9 +32,9 @@ h1{font-size:22px;margin:0;font-weight:850}.small{font-size:12px;color:var(--mut
 .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cal-head{text-align:center;font-size:11px;color:var(--muted);font-weight:850}.cal-day{min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:5px;font-size:12px;cursor:pointer}.cal-day.active{background:var(--accent);color:#fff;border-color:var(--accent)}.cal-day.muted{opacity:.35}.cal-count{display:block;margin-top:3px;font-size:10px;font-weight:850}.date-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:10px 0;gap:10px}.date-row:last-child{border-bottom:0}.date-main{font-size:13px;font-weight:850}.date-sub{font-size:11px;color:var(--muted);margin-top:2px}.summary-calc{font-size:12px;line-height:1.45}.details-box{margin-top:8px}.group-title{font-size:13px;font-weight:850;margin:14px 0 6px;color:#374151}.filter-row{display:flex;gap:8px;overflow:auto;padding:4px 0 8px}.version-line{font-size:11px;color:#9ca3af;border-bottom:1px solid #d1d5db;display:inline-block;padding-bottom:2px;margin-top:8px}</style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v19</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v25 Recovery</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const STORAGE_KEY="echeveria_pwa_v19_data";let state=null,current="home",filter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v25-recovery";const STORAGE_KEY="echeveria_pwa_v25_recovery_data";let state=null,current="home",filter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -76,7 +76,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v19",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v25-recovery",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
   if(status==="葉挿し"){growthType="葉挿し";status="良好"}
@@ -84,7 +84,7 @@ function normalizePlantForV7(p){
   if(growthType==="通常株")growthType="成株";
   return{...p,growthType,status,needsAttention,acquiredDate:p.acquiredDate||"",autoCheckEnabled:p.autoCheckEnabled!==false,autoCheckBaseDays:p.autoCheckBaseDays||5,lastWateredAt:p.lastWateredAt||"未実施",lastWaterAmountLevel:p.lastWaterAmountLevel||"未記録",lastWaterMethod:p.lastWaterMethod||"未記録"};
 }
-function migrate(d){d.version="pwa-v19";d.masters=d.masters||{};d.masters.pots=(d.masters.pots||[]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));d.masters.media=(d.masters.media||[]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));d.trays=(d.trays||[]).map(t=>({...t,direction:t.direction||inferDirection((t.location||"")+" "+(t.type||"")),placement:t.placement||inferPlacement(t.location||""),dry:normalizeDry(t.dry),light:normalizeDry(t.light||"中くらい"),wind:normalizeWind(t.wind||"中くらい")}));d.plants=(d.plants||[]).map(p=>normalizePlantForV7(p));d.histories=d.histories||[];d.photos=d.photos||[];d.backup=d.backup||{lastAt:"",dirty:true,reason:"バックアップ状態未設定"};d.exportLogs=d.exportLogs||[];return d}
+function migrate(d){d.version="pwa-v25-recovery";d.masters=d.masters||{};d.masters.pots=(d.masters.pots||[]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));d.masters.media=(d.masters.media||[]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));d.trays=(d.trays||[]).map(t=>({...t,direction:t.direction||inferDirection((t.location||"")+" "+(t.type||"")),placement:t.placement||inferPlacement(t.location||""),dry:normalizeDry(t.dry),light:normalizeDry(t.light||"中くらい"),wind:normalizeWind(t.wind||"中くらい")}));d.plants=(d.plants||[]).map(p=>normalizePlantForV7(p));d.histories=d.histories||[];d.photos=d.photos||[];d.backup=d.backup||{lastAt:"",dirty:true,reason:"バックアップ状態未設定"};d.exportLogs=d.exportLogs||[];return d}
 function dataScore(d){
   if(!d)return -1;
   const plants=(d.plants||[]).length;
@@ -93,11 +93,33 @@ function dataScore(d){
   const masters=((d.masters?.cultivars||[]).length+(d.masters?.pots||[]).length+(d.masters?.media||[]).length+(d.trays||[]).length);
   return plants*100000 + histories*1000 + photos*100 + masters;
 }
-function load(){
+function storageKeysToCheck(){
   const keys=[STORAGE_KEY];
-  for(let i=23;i>=1;i--)keys.push(`echeveria_pwa_v${i}_data`);
+  keys.push("echeveria_pwa_v25_recovery_data");
+  keys.push("echeveria_pwa_v24_recovery_data");
+  for(let i=24;i>=1;i--)keys.push(`echeveria_pwa_v${i}_data`);
+  return [...new Set(keys)];
+}
+function storageDiagnostics(){
+  return storageKeysToCheck().map(k=>{
+    const raw=localStorage.getItem(k);
+    if(!raw)return {key:k,exists:false,score:-1};
+    try{
+      const d=JSON.parse(raw);
+      return {key:k,exists:true,score:dataScore(d),plants:(d.plants||[]).length,histories:(d.histories||[]).length,photos:(d.photos||[]).length,masters:((d.masters?.cultivars||[]).length+(d.masters?.pots||[]).length+(d.masters?.media||[]).length+(d.trays||[]).length),version:d.version||""};
+    }catch(e){
+      return {key:k,exists:true,broken:true,score:-1};
+    }
+  }).filter(x=>x.exists).sort((a,b)=>b.score-a.score);
+}
+function storageDiagnosticsHtml(){
+  const rows=storageDiagnostics();
+  if(!rows.length)return `<div class="card empty-note">端末内に既存データキーが見つかりません。</div>`;
+  return `<div class="card"><div class="title">保存データ診断</div><div class="subtitle">内容が多い順に表示しています。</div>${rows.map(r=>`<div class="master-row"><div class="grow"><div class="master-name">${esc(r.key)}</div><div class="master-meta">${r.broken?"読み込み不可":`株${r.plants}／履歴${r.histories}／写真${r.photos}／マスター${r.masters}／${esc(r.version||"version不明")}`}</div></div></div>`).join("")}</div>`;
+}
+function load(){
   let best=null,bestKey="",bestScore=-1;
-  for(const k of [...new Set(keys)]){
+  for(const k of storageKeysToCheck()){
     const raw=localStorage.getItem(k);
     if(!raw)continue;
     try{
@@ -109,15 +131,17 @@ function load(){
   if(best){
     state=migrate(best);
     state.recoveredFromKey=bestKey;
+    state.recoveryScore=bestScore;
     save();
   }else{
     state=defaultData();
     state.recoveredFromKey="";
+    state.recoveryScore=0;
     save();
   }
 }
 function save(){state.updatedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function el(i){return document.getElementById(i)}function toast(m){const t=el("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v19"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function el(i){return document.getElementById(i)}function toast(m){const t=el("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v25 Recovery"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -284,7 +308,7 @@ function renderCalendar(){
   <div class="section-title">全株の確認日順</div>
   <div class="card">${renderDateGroup("期限超過",overdue)}${renderDateGroup("今日",todayList)}${renderDateGroup("明日",tomorrowList)}${renderDateGroup("今週",weekList)}${renderDateGroup("来週以降",later)}${renderDateGroup("未設定",unset)||`<div class="empty-note">該当する株がありません。</div>`}</div>`;
 }
-function renderSettings(){setHeader("設定","マスター・バックアップ");const types=["cultivars","pots","media","places"];el("main").innerHTML=`<div class="card"><div class="title">出力・バックアップ</div><div class="subtitle">JSONバックアップ、復元。</div><div class="btnrow"><button class="btn" onclick="openExportCenter()">出力</button><button class="btn secondary" onclick="openImport()">復元</button></div></div>${backupCardHtml()}<div class="card"><span class="version-line">現在のバージョン：${APP_VERSION}</span><br><span class="version-line">読込元：${esc(state.recoveredFromKey||"新規")}</span></div><div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div><div class="card"><div class="title">${masterName(activeMaster)}マスター</div><button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button></div><div class="card">${masterRows(activeMaster)}</div>`}
+function renderSettings(){setHeader("設定","マスター・バックアップ");const types=["cultivars","pots","media","places"];el("main").innerHTML=`<div class="card"><div class="title">出力・バックアップ</div><div class="subtitle">JSONバックアップ、復元。</div><div class="btnrow"><button class="btn" onclick="openExportCenter()">出力</button><button class="btn secondary" onclick="openImport()">復元</button></div></div>${backupCardHtml()}<div class="card"><span class="version-line">現在のバージョン：${APP_VERSION}</span><br><span class="version-line">読込元：${esc(state.recoveredFromKey||"新規")}</span><br><span class="version-line">復旧スコア：${esc(state.recoveryScore??0)}</span></div>${storageDiagnosticsHtml()}<div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div><div class="card"><div class="title">${masterName(activeMaster)}マスター</div><button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button></div><div class="card">${masterRows(activeMaster)}</div>`}
 function masterRows(t){const arr=sortedMasterList(t);return arr.map(item=>{const count=usedCount(t,item.id),meta=(t==="pots"||t==="media")?`乾きやすさ：${item.dry||"普通"}${item.note?`｜${item.note}`:""}`:(item.note||((item.direction||"")+" "+(item.placement||""))||"メモなし");return `<div class="master-row"><div class="grow"><div class="master-name">${esc(item.name)}</div><div class="master-meta">使用中：${count}件｜${esc(meta)}</div></div><button class="iconbtn" onclick="openMasterForm('${t}','${item.id}')">編集</button><button class="iconbtn danger" onclick="deleteMaster('${t}','${item.id}')">削除</button></div>`}).join("")||`<div class="empty-note">未登録です。</div>`}
 function openMasterForm(t,i=null){activeMaster=t;editingMasterId=i;const item=i?mList(t).find(x=>x.id===i):null;setHeader(`${masterName(t)}${item?"編集":"追加"}`,"マスター管理");if(t==="places")el("main").innerHTML=`<div class="card form"><label>置き場所名</label><input id="mName" value="${attr(item?.name||"")}"><label>日当たり（方角）</label><select id="mDirection">${["東向き","西向き","南向き","北向き","室内照明"].map(x=>`<option ${item?.direction===x?"selected":""}>${x}</option>`).join("")}</select><label>設置場所</label><select id="mPlacement">${["室内","屋外"].map(x=>`<option ${item?.placement===x?"selected":""}>${x}</option>`).join("")}</select><label>乾きやすさ</label><select id="mDry">${["かなり乾きやすい","やや乾きやすい","普通","やや乾きにくい","かなり乾きにくい"].map(x=>`<option ${item?.dry===x?"selected":""}>${x}</option>`).join("")}</select><label>光</label><select id="mLight">${["かなり弱い","弱い","中くらい","強い","かなり強い"].map(x=>`<option ${item?.light===x?"selected":""}>${x}</option>`).join("")}</select><label>風</label><select id="mWind">${["弱風あり","中くらい","強風あり","風なし","不定期"].map(x=>`<option ${item?.wind===x?"selected":""}>${x}</option>`).join("")}</select><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`;else if(t==="pots"||t==="media")el("main").innerHTML=`<div class="card form"><label>${masterName(t)}名</label><input id="mName" value="${attr(item?.name||"")}"><label>乾きやすさ</label><select id="mDry">${["かなり乾きやすい","やや乾きやすい","普通","やや乾きにくい","かなり乾きにくい"].map(x=>`<option ${(item?.dry||"普通")===x?"selected":""}>${x}</option>`).join("")}</select><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`;
 else el("main").innerHTML=`<div class="card form"><label>${masterName(t)}名</label><input id="mName" value="${attr(item?.name||"")}"><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`}
