@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "写真をIndexedDBへ切り離し保存を安全化したエケベリア管理PWA v39"
+  "description": "保存確定処理を安全化したエケベリア管理PWA v40"
 }

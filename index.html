@@ -42,9 +42,9 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v39 Photo DB Safe Save</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v40 Safe Commit</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v39-photo-db-safe-save";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v40-safe-commit";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -86,7 +86,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v39-photo-db-safe-save",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v40-safe-commit",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -103,7 +103,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v39-photo-db-safe-save";
+  d.version="pwa-v40-safe-commit";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -176,6 +176,7 @@ function getPreviousData(){
   return readJsonKey("echeveria_pwa_previous_data");
 }
 
+let isAppUpdating=false;
 let photoUrlCache={};
 function hasInlinePhotoData(ph){return !!(ph&&(ph.dataUrl||ph.data||ph.src));}
 function photoMetaOnly(ph){
@@ -302,33 +303,77 @@ function load(){
   state.lastLoadedAt=nowText();
   state.saveStatus={ok:true,at:nowText(),message:"新規データを開始しました。"};
 }
+
+function cleanRawDataForPrevious(raw){
+  if(!raw)return null;
+  try{
+    const parsed=JSON.parse(raw);
+    const data=parsed.data||parsed;
+    return JSON.stringify(cleanStateForStorage(data));
+  }catch(e){
+    return null;
+  }
+}
+function verifyStoredPayload(key,payload){
+  try{return localStorage.getItem(key)===payload}catch(e){return false}
+}
+
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v39-photo-db-safe-save";
+    state.version="pwa-v40-safe-commit";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
+
     const payload=storagePayload();
     const tmpKey=STORAGE_KEY+"_tmp";
+
     const tmp=safeSetLocalStorage(tmpKey,payload);
     if(!tmp.ok){
-      state.saveStatus={ok:false,at:nowText(),message:"保存に失敗しました。写真を軽量化またはJSONバックアップを取得してください。",error:tmp.error};
+      state.saveStatus={ok:false,at:nowText(),message:"保存に失敗しました。一時保存ができません。本番データは上書きしていません。",error:tmp.error};
       try{toast("保存に失敗しました")}catch(_){}
       return state.saveStatus;
     }
-    const verify=localStorage.getItem(tmpKey);
-    if(verify!==payload){
+    if(!verifyStoredPayload(tmpKey,payload)){
       state.saveStatus={ok:false,at:nowText(),message:"保存検証に失敗しました。本番データは上書きしていません。"};
       try{toast("保存に失敗しました")}catch(_){}
       return state.saveStatus;
     }
+
     const currentRaw=localStorage.getItem(STORAGE_KEY);
-    if(currentRaw)localStorage.setItem("echeveria_pwa_previous_data",currentRaw);
-    localStorage.setItem(STORAGE_KEY,payload);
-    localStorage.removeItem(tmpKey);
+
+    const main=safeSetLocalStorage(STORAGE_KEY,payload);
+    if(!main.ok){
+      state.saveStatus={ok:false,at:nowText(),message:"本番保存に失敗しました。既存データは維持されています。",error:main.error};
+      try{toast("保存に失敗しました")}catch(_){}
+      return state.saveStatus;
+    }
+    if(!verifyStoredPayload(STORAGE_KEY,payload)){
+      state.saveStatus={ok:false,at:nowText(),message:"本番保存の検証に失敗しました。"};
+      try{toast("保存に失敗しました")}catch(_){}
+      return state.saveStatus;
+    }
+
+    try{localStorage.removeItem(tmpKey)}catch(e){}
+
+    let previousOk=true;
+    if(currentRaw){
+      const prevPayload=cleanRawDataForPrevious(currentRaw);
+      if(prevPayload){
+        const prev=safeSetLocalStorage("echeveria_pwa_previous_data",prevPayload);
+        previousOk=!!prev.ok;
+      }
+    }
+
     state.lastSaveSuccessAt=state.lastSavedAt;
     state.lastSaveBytes=estimateBytes(payload);
-    state.saveStatus={ok:true,at:state.lastSavedAt,message:`保存成功（${formatBytes(estimateBytes(payload))}）`,bytes:estimateBytes(payload)};
+    state.saveStatus={
+      ok:true,
+      at:state.lastSavedAt,
+      message:previousOk?`保存成功（${formatBytes(estimateBytes(payload))}）`:`保存成功。直前データ退避のみ失敗しました（${formatBytes(estimateBytes(payload))}）`,
+      bytes:estimateBytes(payload),
+      previousOk
+    };
     return state.saveStatus;
   }catch(e){
     state.saveStatus={ok:false,at:nowText(),message:"保存に失敗しました。本番データは上書きしていません。",error:String(e)};
@@ -356,7 +401,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v39 Photo DB Safe Save"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v40 Safe Commit"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -774,10 +819,11 @@ function restoreEmergencyBackup(){
 }
 async function forceUpdateApp(){
   if(!confirm("アプリ本体を最新版に更新します。実行前に現在データを安全保存します。失敗した場合は更新を中止します。実行しますか？"))return;
+  isAppUpdating=true;
   const saved=save();
-  if(!saved||saved.ok===false){toast("保存に失敗したため更新を中止しました");return}
+  if(!saved||saved.ok===false){isAppUpdating=false;toast("保存に失敗したため更新を中止しました");return}
   const snapOk=emergencySnapshot();
-  if(!snapOk){toast("緊急バックアップに失敗したため更新を中止しました");return}
+  if(!snapOk){isAppUpdating=false;toast("緊急バックアップに失敗したため更新を中止しました");return}
   try{
     if("serviceWorker" in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
@@ -818,8 +864,8 @@ window.addEventListener("error",e=>{
 });
 
 if("serviceWorker"in navigator){navigator.serviceWorker.register("./service-worker.js").catch(()=>{})}
-window.addEventListener("pagehide",()=>{try{save()}catch(e){}});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){try{save()}catch(e){}}});
+window.addEventListener("pagehide",()=>{try{if(!isAppUpdating)save()}catch(e){}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){try{if(!isAppUpdating)save()}catch(e){}}});
 
 load();go("home");setTimeout(()=>migrateInlinePhotosToDB(),300);
 </script>
