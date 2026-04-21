@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "株一覧に品種フィルターを追加したエケベリア管理PWA v38"
+  "description": "写真をIndexedDBへ切り離し保存を安全化したエケベリア管理PWA v39"
 }
