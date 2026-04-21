@@ -1,24 +1,24 @@
-# エケベリア管理 PWA v28 Target Recovery
+# エケベリア管理 PWA v29 Stable
 
-## v28の目的
+## v29の目的
 
-今回の復旧作業用に、保存データ診断の対象を絞った版です。
+復旧作業をいったん止め、通常運用版に戻した安定版です。
 
-## 変更点
+## 主な変更点
 
-- 診断表示対象を以下に限定
-  - echeveria_pwa_data
-  - echeveria_pwa_v28_target_recovery_data
-  - echeveria_pwa_v27_manual_recovery_data
-  - echeveria_pwa_v26_stable_data
-  - echeveria_pwa_v26_data
-  - echeveria_pwa_v25_recovery_data
-  - echeveria_pwa_v25_data
-- v19〜v24の旧キー群は診断表示から除外
-- 起動時に旧キーを自動採用しない
-- 必要なキーだけ、設定画面から手動で「このデータを採用」する方式
+- 保存キーを固定キー `echeveria_pwa_data` に統一
+- 起動時に旧バージョンキーを自動採用しない
+- ホーム画面のバックアップ状況カードは非表示
+- 記録ページのバックアップボタンは維持
+- 設定画面のバックアップ状況カードは維持
+- 設定画面に現在バージョン、保存キー、株数、履歴数、写真数を表示
+- 設定画面に「アプリ本体を最新版に更新」ボタンを追加
+- 更新ボタン実行前に localStorage 内へ緊急バックアップを作成
+- Service Worker と Cache Storage のみ削除
+- localStorage.clear() は使用しない
+- 緊急バックアップから復元するボタンを追加
 
-## 注意
+## 更新ボタンの注意
 
-この版は復旧対象を絞るための一時版です。
-正しいデータを採用できたら、すぐJSONバックアップを取得してください。
+このボタンは、GitHub Pagesの反映そのものを早めるものではありません。
+iPhone側に残ったPWA本体の古いキャッシュを削除し、最新版を取りに行きやすくするためのものです。
