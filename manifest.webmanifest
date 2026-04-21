@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "クローン作成と中株区分を追加したエケベリア管理PWA v22",
+  "description": "株一覧を次回確認日順に並べるエケベリア管理PWA v23",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
