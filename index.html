@@ -35,12 +35,16 @@ h1{font-size:22px;margin:0;font-weight:850}.small{font-size:12px;color:var(--mut
 .cal-day.has{font-weight:900}
 .cal-day.active{background:var(--accent)!important;color:#fff!important}
 button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
+
+.filter-block{margin:10px 0 8px}
+.filter-label{font-size:12px;font-weight:850;color:var(--muted);margin:8px 2px 6px}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:6px}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v37 Clone From Add</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v38 Cultivar Filter</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v37-clone-from-add";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v38-cultivar-filter";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -82,7 +86,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v37-clone-from-add",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v38-cultivar-filter",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -99,7 +103,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v37-clone-from-add";
+  d.version="pwa-v38-cultivar-filter";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -199,7 +203,7 @@ function save(){
     if(currentRaw){
       localStorage.setItem("echeveria_pwa_previous_data", currentRaw);
     }
-    state.version="pwa-v37-clone-from-add";
+    state.version="pwa-v38-cultivar-filter";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
     const payload=JSON.stringify(state);
@@ -231,7 +235,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v37 Clone From Add"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v38 Cultivar Filter"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -323,8 +327,73 @@ function latestPhoto(pid){return state.photos.filter(p=>p.plantId===pid).sort((a
 function processPhotoInput(inputId,previewId){const input=el(inputId),file=input.files&&input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{const size=Math.min(img.width,img.height),sx=(img.width-size)/2,sy=(img.height-size)/2,canvas=document.createElement("canvas");canvas.width=512;canvas.height=512;canvas.getContext("2d").drawImage(img,sx,sy,size,size,0,0,512,512);pendingPhoto=canvas.toDataURL("image/jpeg",0.78);if(previewId)el(previewId).innerHTML=`<div class="hero"><img src="${pendingPhoto}"></div><div class="small">中央スクエアで切り抜き済み</div>`};img.src=e.target.result};reader.readAsDataURL(file)}
 function plantCard(p){return `<div class="card plant-card" onclick="openDetail('${p.id}')"><div class="avatar">${photoHtml(p.id)}</div><div class="grow"><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}<br>${esc(managementDays(p))}｜最終水やり：${esc(p.lastWateredAt||"未実施")}｜量：${esc(p.lastWaterAmountLevel||"未記録")}</div><span class="pill gray">${esc(p.growthType||"成株")}</span>${p.needsAttention?`<span class="pill warn">要観察</span>`:""}<span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">次回 ${esc(p.nextCheckDate||"未設定")}</span>${dueLevel(p)?`<span class="pill warn">${dueLevel(p)}</span>`:""}</div></div>`}
 function renderHome(){setHeader("ホーム","今日確認する株を中心に表示");const today=notificationToday(),tomorrow=addDays(today,1),over=activePlants().filter(p=>p.nextCheckDate&&p.nextCheckDate<today).sort((a,b)=>a.nextCheckDate.localeCompare(b.nextCheckDate)),tod=activePlants().filter(p=>p.nextCheckDate===today).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),tom=activePlants().filter(p=>p.nextCheckDate===tomorrow).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),recent=(Array.isArray(state.histories)?state.histories:[]).slice().sort((a,b)=>(b.happenedAt||"").localeCompare(a.happenedAt||"")).slice(0,5);el("main").innerHTML=`${over.length||tod.length?`<div class="card notice">画面内通知：期限超過 ${over.length}株／本日確認 ${tod.length}株。AM7時基準。</div>`:""}<div class="card"><button class="btn" onclick="openAddPlant()">新規株を登録</button></div><div class="section-title">今日確認する株 <span class="small">${tod.length}株</span></div>${tod.map(plantCard).join("")||`<div class="card empty-note">今日の確認対象はありません。</div>`}<div class="section-title">期限超過の株 <span class="small">${over.length}株</span></div>${over.map(plantCard).join("")||`<div class="card empty-note">期限超過の株はありません。</div>`}<div class="section-title">明日確認する株 <span class="small">${tom.length}株</span></div>${tom.map(plantCard).join("")||`<div class="card empty-note">明日の確認対象はありません。</div>`}<div class="section-title">最近の記録</div><div class="card">${historyHtml(recent)}</div>`}
-function renderPlants(){setHeader("株一覧","検索・絞り込み");const chips=["すべて","良好","要観察","発根待ち","発根管理中","水切れ気味","蒸れ注意"];const list=sortByNextCheck(activePlants().filter(p=>filter==="すべて"||(filter==="要観察"?(p.needsAttention||p.status!=="良好"):p.status===filter)));el("main").innerHTML=`<input class="search" placeholder="管理名・品種名・置き場所で検索" oninput="searchPlants(this.value)"><div class="chips">${chips.map(c=>`<div class="chip ${c===filter?'active':''}" onclick="filter='${c}';renderPlants()">${c}</div>`).join("")}</div><div class="btnrow"><button class="btn secondary" onclick="openAddPlant()">株を登録</button><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div id="plantList">${list.map(plantCard).join("")||`<div class="card empty-note">株がありません。</div>`}</div>`}
-function searchPlants(q){q=q.trim();const list=sortByNextCheck(activePlants().filter(p=>(filter==="すべて"||(filter==="要観察"?(p.needsAttention||p.status!=="良好"):p.status===filter))&&(p.displayName.includes(q)||mName("cultivars",p.cultivarId).includes(q)||mName("places",p.trayId).includes(q))));el("plantList").innerHTML=list.map(plantCard).join("")||`<div class="card empty-note">該当する株がありません。</div>`}
+
+function kanaGroupRank(name){
+  const n=(name||"").trim();
+  if(!n)return 9;
+  const c=n[0];
+  if(/[ぁ-ん]/.test(c))return 1;
+  if(/[ァ-ヶー]/.test(c))return 2;
+  if(/[一-龠々〆ヵヶ]/.test(c))return 3;
+  return 4;
+}
+function cultivarNameSort(a,b){
+  const an=(a?.name||""),bn=(b?.name||"");
+  const gr=kanaGroupRank(an)-kanaGroupRank(bn);
+  if(gr!==0)return gr;
+  return an.localeCompare(bn,"ja",{sensitivity:"base",numeric:true});
+}
+function usedCultivarChips(){
+  const used=new Set(activePlants().map(p=>p.cultivarId).filter(Boolean));
+  return mList("cultivars").filter(c=>used.has(c.id)).sort(cultivarNameSort);
+}
+function statusFilterItems(){
+  return ["すべて","良好","要観察","発根待ち","発根管理中","水切れ気味","蒸れ注意"];
+}
+function applyStatusFilter(f){
+  plantFilterMode="status";
+  plantStatusFilter=f;
+  filter=f;
+  plantCultivarFilter="すべて";
+  renderPlants();
+}
+function applyCultivarFilter(id){
+  plantFilterMode="cultivar";
+  plantCultivarFilter=id;
+  plantStatusFilter="すべて";
+  filter="すべて";
+  renderPlants();
+}
+function filteredPlantList(q=""){
+  let list=activePlants();
+  if(plantFilterMode==="cultivar"){
+    if(plantCultivarFilter!=="すべて")list=list.filter(p=>p.cultivarId===plantCultivarFilter);
+  }else{
+    const f=plantStatusFilter||filter||"すべて";
+    list=list.filter(p=>f==="すべて"||(f==="要観察"?(p.needsAttention||p.status!=="良好"):p.status===f));
+  }
+  if(q){
+    list=list.filter(p=>(p.displayName||"").includes(q)||mName("cultivars",p.cultivarId).includes(q)||mName("places",p.trayId).includes(q));
+  }
+  return sortByNextCheck?sortByNextCheck(list):list.slice().sort((a,b)=>(a.nextCheckDate||"9999-99-99").localeCompare(b.nextCheckDate||"9999-99-99"));
+}
+function plantFilterHtml(){
+  const status=statusFilterItems();
+  const cultivars=usedCultivarChips();
+  return `<div class="filter-block"><div class="filter-label">状態</div><div class="chips">${status.map(f=>`<div class="chip ${plantFilterMode==="status"&&plantStatusFilter===f?'active':''}" onclick="applyStatusFilter('${esc(f)}')">${esc(f)}</div>`).join("")}</div></div>
+  <div class="filter-block"><div class="filter-label">品種</div><div class="chip-wrap"><div class="chip ${plantFilterMode==="cultivar"&&plantCultivarFilter==="すべて"?'active':''}" onclick="applyCultivarFilter('すべて')">すべて</div>${cultivars.map(c=>`<div class="chip ${plantFilterMode==="cultivar"&&plantCultivarFilter===c.id?'active':''}" onclick="applyCultivarFilter('${esc(c.id)}')">${esc(c.name)}</div>`).join("")}</div></div>`;
+}
+
+function renderPlants(){
+  setHeader("株一覧","状態・品種で絞り込み");
+  const list=filteredPlantList();
+  const modeLabel=plantFilterMode==="cultivar"?(plantCultivarFilter==="すべて"?"品種：すべて":`品種：${mName("cultivars",plantCultivarFilter)}`):`状態：${plantStatusFilter||"すべて"}`;
+  el("main").innerHTML=`<input class="search" id="plantSearch" placeholder="管理名・品種名・置き場所で検索" oninput="searchPlants(this.value)">${plantFilterHtml()}<div class="btnrow"><button class="btn secondary" onclick="openAddPlant()">株を登録</button><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="section-title">${esc(modeLabel)} <span class="small">${list.length}株</span></div><div id="plantList">${list.map(plantCard).join("")||`<div class="card empty-note">該当する株はありません。</div>`}</div>`;
+}
+function searchPlants(q=""){
+  const list=filteredPlantList((q||"").trim());
+  el("plantList").innerHTML=list.map(plantCard).join("")||`<div class="card empty-note">該当する株はありません。</div>`;
+}
 function openDetail(pid){selectedPlantId=pid;current="plants";setTabs();const p=plantById(pid);setHeader(p.displayName,mName("cultivars",p.cultivarId));el("main").innerHTML=`<div class="card"><div class="hero">${photoHtml(p.id)}</div><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}</div><span class="pill gray">${esc(p.growthType||"成株")}</span>${p.needsAttention?`<span class="pill warn">要観察</span>`:""}<span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">${esc(mName("pots",p.potId))}</span><span class="pill gray">${esc(mName("media",p.mediumId))}</span><div class="kv"><div class="k">お迎え日</div><div>${esc(p.acquiredDate||"未記録")}</div></div><div class="kv"><div class="k">最終水やり</div><div>${esc(p.lastWateredAt||"未実施")}</div></div><div class="kv"><div class="k">水やり量</div><div>${esc(p.lastWaterAmountLevel||"未記録")}</div></div><div class="kv"><div class="k">次回確認</div><div>${esc(p.nextCheckDate||"未設定")}</div></div><div class="kv"><div class="k">メモ</div><div>${esc(p.memo||"—")}</div></div><div class="btnrow"><button class="btn" onclick="openWater('${p.id}')">水やり</button><button class="btn secondary" onclick="openObserve('${p.id}')">観察</button></div><div class="btnrow three"><button class="btn ghost" onclick="openEditPlant('${p.id}')">株情報編集</button><button class="btn ghost" onclick="openAlbum('${p.id}')">写真</button><button class="btn ghost" onclick="openClonePlant('${p.id}')">クローン作成</button></div></div><div class="section-title">履歴</div><div class="card">${historyHtml(state.histories.filter(h=>h.plantId===p.id).sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,8))}</div>`}
 function historyHtml(list){if(!list.length)return `<div class="empty-note">履歴はありません。</div>`;return `<div class="history">${list.map(h=>{const p=plantById(h.plantId);return `<div class="hist-item"><div class="hist-title">${p?esc(p.displayName)+"｜":""}${esc(h.title)}</div><div class="hist-meta">${esc(h.happenedAt)}</div><div class="hist-text">${esc(h.note||"")}</div></div>`}).join("")}</div>`}
 function openAlbum(pid){const p=plantById(pid),photos=state.photos.filter(ph=>ph.plantId===pid).sort((a,b)=>b.takenAt.localeCompare(a.takenAt));setHeader("写真一覧",p.displayName);el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openAddPhoto('${pid}')">写真を追加</button></div>${photos.length?`<div class="card"><div class="album">${photos.map(ph=>`<div class="photo-tile" onclick="openPhotoDetail('${ph.id}')"><img src="${ph.dataUrl}"><div class="photo-label">${esc(ph.type)}｜${ph.takenAt.slice(5,10)}</div></div>`).join("")}</div></div>`:`<div class="card empty-note">写真はまだありません。</div>`}<div class="card"><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div>`}
