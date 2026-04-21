@@ -1,34 +1,24 @@
-# エケベリア管理 PWA v30 Last Recovery
+# エケベリア管理 PWA v31 Autosave
 
-## v30の目的
+## v31の目的
 
-v25・v26・v27系の保存データを、最後の復旧候補として設定画面に表示する版です。
+保存データ診断・復旧候補表示をやめ、通常運用で入力データが消えにくい保存方式へ変更した版です。
 
-## 重要
+## 主な変更点
 
-- 起動時に旧データを自動採用しません。
-- 通常保存キーは `echeveria_pwa_data` のままです。
-- 設定画面の「保存データ診断・復旧候補」から、必要なデータだけ手動採用できます。
-- 採用前には緊急バックアップを自動作成します。
+- 保存データ診断欄を削除
+- 旧バージョンキーを自動採用しない
+- 通常保存キーは `echeveria_pwa_data`
+- 保存時に以下へ自動ミラー保存
+  - echeveria_pwa_data
+  - echeveria_pwa_autosave_latest
+  - echeveria_pwa_autosave_0〜4
+- 起動時は、自動保存候補のうち最新日時の新しいものを採用
+- アプリを閉じる時・非表示になる時にも保存を試行
+- 設定画面に「自動保存から復元」ボタンを設置
+- 手動バックアップに頼りすぎない運用へ変更
 
-## 表示対象
+## 注意
 
-- echeveria_pwa_data
-- echeveria_pwa_v30_last_recovery_data
-- echeveria_pwa_v29_stable_data
-- echeveria_pwa_v28_target_recovery_data
-- echeveria_pwa_v27_manual_recovery_data
-- echeveria_pwa_v27_data
-- echeveria_pwa_v26_stable_data
-- echeveria_pwa_v26_data
-- echeveria_pwa_v25_recovery_data
-- echeveria_pwa_v25_data
-
-## 確認手順
-
-1. `?v=30-last-recovery` で開く
-2. 設定画面を開く
-3. 復旧候補の株数・履歴数・写真数・最新日時を確認
-4. 必要な候補があれば「このデータを採用」
-5. 採用後、株一覧・履歴を確認
-6. 正しければJSONバックアップを取得
+Safariの「Webサイトデータ削除」やiOS側のデータ削除を行うと、localStorage内の自動保存も消える可能性があります。
+そのため、重要な節目ではJSONバックアップも併用してください。
