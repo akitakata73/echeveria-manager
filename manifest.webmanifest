@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "v33の実行時エラーを修正したエケベリア管理PWA v34"
+  "description": "データ欠損時の表示停止を防ぐエケベリア管理PWA v35"
 }
