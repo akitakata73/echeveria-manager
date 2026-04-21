@@ -1,24 +1,34 @@
-# エケベリア管理 PWA v29 Stable
+# エケベリア管理 PWA v30 Last Recovery
 
-## v29の目的
+## v30の目的
 
-復旧作業をいったん止め、通常運用版に戻した安定版です。
+v25・v26・v27系の保存データを、最後の復旧候補として設定画面に表示する版です。
 
-## 主な変更点
+## 重要
 
-- 保存キーを固定キー `echeveria_pwa_data` に統一
-- 起動時に旧バージョンキーを自動採用しない
-- ホーム画面のバックアップ状況カードは非表示
-- 記録ページのバックアップボタンは維持
-- 設定画面のバックアップ状況カードは維持
-- 設定画面に現在バージョン、保存キー、株数、履歴数、写真数を表示
-- 設定画面に「アプリ本体を最新版に更新」ボタンを追加
-- 更新ボタン実行前に localStorage 内へ緊急バックアップを作成
-- Service Worker と Cache Storage のみ削除
-- localStorage.clear() は使用しない
-- 緊急バックアップから復元するボタンを追加
+- 起動時に旧データを自動採用しません。
+- 通常保存キーは `echeveria_pwa_data` のままです。
+- 設定画面の「保存データ診断・復旧候補」から、必要なデータだけ手動採用できます。
+- 採用前には緊急バックアップを自動作成します。
 
-## 更新ボタンの注意
+## 表示対象
 
-このボタンは、GitHub Pagesの反映そのものを早めるものではありません。
-iPhone側に残ったPWA本体の古いキャッシュを削除し、最新版を取りに行きやすくするためのものです。
+- echeveria_pwa_data
+- echeveria_pwa_v30_last_recovery_data
+- echeveria_pwa_v29_stable_data
+- echeveria_pwa_v28_target_recovery_data
+- echeveria_pwa_v27_manual_recovery_data
+- echeveria_pwa_v27_data
+- echeveria_pwa_v26_stable_data
+- echeveria_pwa_v26_data
+- echeveria_pwa_v25_recovery_data
+- echeveria_pwa_v25_data
+
+## 確認手順
+
+1. `?v=30-last-recovery` で開く
+2. 設定画面を開く
+3. 復旧候補の株数・履歴数・写真数・最新日時を確認
+4. 必要な候補があれば「このデータを採用」
+5. 採用後、株一覧・履歴を確認
+6. 正しければJSONバックアップを取得
