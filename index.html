@@ -44,15 +44,14 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 .avatar .photo-missing{width:54px;height:54px;min-height:54px;border-radius:16px}
 .hero .photo-missing{min-height:220px}
 
-.pill.today{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
 .pill.overdue{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
 .check-line{margin-top:6px}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v42 Check Label UI</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v43 Overdue Only Photo Cleanup</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v42-check-label-ui";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v43-overdue-only-photo-cleanup";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -94,7 +93,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v42-check-label-ui",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v43-overdue-only-photo-cleanup",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -111,7 +110,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v42-check-label-ui";
+  d.version="pwa-v43-overdue-only-photo-cleanup";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -337,7 +336,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v42-check-label-ui";
+    state.version="pwa-v43-overdue-only-photo-cleanup";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -417,7 +416,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v42 Check Label UI"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v43 Overdue Only Photo Cleanup"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -497,7 +496,7 @@ function waterAmountAdjustment(amount){
 }
 function computeNextCheck({status,growth,trayId,potId,mediumId,waterAmount,baseDate,datetimeText}){const base=baseDaysFor(status,growth),month=Number((baseDate||dateOnly()).slice(5,7))||new Date().getMonth()+1,season=seasonAdjustment(month),sun=sunlightAdjustment(trayId),potAdj=potAdjustment(potId),medAdj=mediumAdjustment(mediumId),waterAdj=waterAmountAdjustment(waterAmount||"普通"),time=wateringTimeAdjustment(datetimeText||""),st=statusAdjustment(status),raw=season.value+sun.value+potAdj.value+medAdj.value+waterAdj.value+time.value+st.value,limit=growth==="成株"?2:1,adj=clamp(raw,-limit,limit),capped=adj!==raw,calculated=base.days+adj,floored=Math.floor(calculated),finalDays=Math.max(1,floored),nextDate=addDays(baseDate||dateOnly(),finalDays),lines=[base.label,season.label,sun.label,potAdj.label,medAdj.label,waterAdj.label,time.label,st.label,`補正合計 ${raw>=0?"+":""}${raw.toFixed(1)}日${capped?` → 上限適用 ${adj>=0?"+":""}${adj.toFixed(1)}日`:""}`,`補正後 ${calculated.toFixed(1)}日 → 切り捨て ${floored}日`,`最終 ${finalDays}日後`];if(finalDays===1&&floored<1)lines.push("最低1日ルールにより1日後");return{nextDate,finalDays,lines,warning:st.warning||""}}
 function suggestDays(status,growth,potId,trayId){return computeNextCheck({status,growth,trayId,potId,mediumId:null,waterAmount:"普通",baseDate:dateOnly(),datetimeText:""}).finalDays}
-function notificationToday(){const d=new Date();if(d.getHours()<7)d.setDate(d.getDate()-1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function dueLevel(p){const t=notificationToday();return p.nextCheckDate<t?"期限超過":p.nextCheckDate===t?"本日確認":""}function statusClass(s){return s==="要観察"||s==="水切れ気味"?"warn":(s==="発根待ち"||s==="発根管理中"||s==="蒸れ注意")?"danger":""}
+function notificationToday(){const d=new Date();if(d.getHours()<7)d.setDate(d.getDate()-1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function dueLevel(p){const t=notificationToday();return p.nextCheckDate<t?"期限超過":p.nextCheckDate===t?"":""}function statusClass(s){return s==="要観察"||s==="水切れ気味"?"warn":(s==="発根待ち"||s==="発根管理中"||s==="蒸れ注意")?"danger":""}
 function esc(s){return (s??"").toString().replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}function attr(s){return esc(s).replace(/"/g,"&quot;")}
 function managementDays(p){
   if(!p.acquiredDate)return"管理日数：未記録";
@@ -512,6 +511,22 @@ function latestPhoto(pid){return state.photos.filter(p=>p.plantId===pid).sort((a
   if(inline)return `<img src="${inline}" alt="">`;
   return `<span class="photo-missing" data-photo-missing="${esc(ph.id)}">写真読込中</span><img data-photo-id="${esc(ph.id)}" alt="" style="display:none">`;
 }
+
+function isPlaceholderPhoto(ph){
+  const text=`${ph?.title||""} ${ph?.type||""} ${ph?.note||""}`.trim();
+  if(!text)return false;
+  return /写真なし|No Photo|no photo|placeholder|プレースホルダー/i.test(text);
+}
+function cleanupPlaceholderPhotosForPlant(plantId, keepId=""){
+  const before=(state.photos||[]).length;
+  state.photos=(state.photos||[]).filter(ph=>{
+    if(ph.id===keepId)return true;
+    if(ph.plantId!==plantId)return true;
+    return !isPlaceholderPhoto(ph);
+  });
+  return before-(state.photos||[]).length;
+}
+
 async function addPhoto(plantId,title,note=""){
   if(!pendingPhoto)return {ok:false,error:"no pending photo"};
   const data=pendingPhoto.dataUrl||pendingPhoto.data||pendingPhoto.src||pendingPhoto;
@@ -522,6 +537,7 @@ async function addPhoto(plantId,title,note=""){
     const ok=await putPhotoBlob(ph.id,blob);
     if(!ok)throw new Error("indexedDB unavailable");
     state.photos=state.photos||[];
+    cleanupPlaceholderPhotosForPlant(plantId, ph.id);
     state.photos.unshift(ph);
     pendingPhoto=null;
     const saved=save();
@@ -566,13 +582,11 @@ function checkStatusLabel(dateStr){
   if(!dateStr)return "";
   const today=todayISO();
   if(dateStr<today)return "確認目安超過";
-  if(dateStr===today)return "本日確認";
   return "";
 }
 function checkStatusClass(dateStr){
   const label=checkStatusLabel(dateStr);
   if(label==="確認目安超過")return "overdue";
-  if(label==="本日確認")return "today";
   return "";
 }
 function checkStatusPill(dateStr){
@@ -582,7 +596,7 @@ function checkStatusPill(dateStr){
 }
 
 function plantCard(p){return `<div class="card plant-card" onclick="openDetail('${p.id}')"><div class="avatar">${photoHtml(p.id)}</div><div class="grow"><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}<br>${esc(managementDays(p))}｜最終水やり：${esc(p.lastWateredAt||"未実施")}｜量：${esc(p.lastWaterAmountLevel||"未記録")}</div><span class="pill gray">${esc(p.growthType||"成株")}</span>${p.needsAttention?`<span class="pill warn">要観察</span>`:""}<span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">次回 ${esc(p.nextCheckDate||"未設定")} ${checkStatusPill(p.nextCheckDate)}</span>${dueLevel(p)?`<span class="pill warn">${dueLevel(p)}</span>`:""}</div></div>`}
-function renderHome(){setHeader("ホーム","今日確認する株を中心に表示");const today=notificationToday(),tomorrow=addDays(today,1),over=activePlants().filter(p=>p.nextCheckDate&&p.nextCheckDate<today).sort((a,b)=>a.nextCheckDate.localeCompare(b.nextCheckDate)),tod=activePlants().filter(p=>p.nextCheckDate===today).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),tom=activePlants().filter(p=>p.nextCheckDate===tomorrow).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),recent=(Array.isArray(state.histories)?state.histories:[]).slice().sort((a,b)=>(b.happenedAt||"").localeCompare(a.happenedAt||"")).slice(0,5);el("main").innerHTML=`${over.length||tod.length?`<div class="card notice">画面内通知：期限超過 ${over.length}株／本日確認 ${tod.length}株。AM7時基準。</div>`:""}<div class="card"><button class="btn" onclick="openAddPlant()">新規株を登録</button></div><div class="section-title">今日確認する株 <span class="small">${tod.length}株</span></div>${tod.map(plantCard).join("")||`<div class="card empty-note">今日の確認対象はありません。</div>`}<div class="section-title">期限超過の株 <span class="small">${over.length}株</span></div>${over.map(plantCard).join("")||`<div class="card empty-note">期限超過の株はありません。</div>`}<div class="section-title">明日確認する株 <span class="small">${tom.length}株</span></div>${tom.map(plantCard).join("")||`<div class="card empty-note">明日の確認対象はありません。</div>`}<div class="section-title">最近の記録</div><div class="card">${historyHtml(recent)}</div>`;setTimeout(()=>renderAsyncPhotos(),0)}function kanaGroupRank(name){
+function renderHome(){setHeader("ホーム","今日確認する株を中心に表示");const today=notificationToday(),tomorrow=addDays(today,1),over=activePlants().filter(p=>p.nextCheckDate&&p.nextCheckDate<today).sort((a,b)=>a.nextCheckDate.localeCompare(b.nextCheckDate)),tod=activePlants().filter(p=>p.nextCheckDate===today).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),tom=activePlants().filter(p=>p.nextCheckDate===tomorrow).sort((a,b)=>a.displayName.localeCompare(b.displayName,'ja')),recent=(Array.isArray(state.histories)?state.histories:[]).slice().sort((a,b)=>(b.happenedAt||"").localeCompare(a.happenedAt||"")).slice(0,5);el("main").innerHTML=`${over.length||tod.length?`<div class="card notice">画面内通知：期限超過 ${over.length}株／ ${tod.length}株。AM7時基準。</div>`:""}<div class="card"><button class="btn" onclick="openAddPlant()">新規株を登録</button></div><div class="section-title">今日確認する株 <span class="small">${tod.length}株</span></div>${tod.map(plantCard).join("")||`<div class="card empty-note">今日の確認対象はありません。</div>`}<div class="section-title">期限超過の株 <span class="small">${over.length}株</span></div>${over.map(plantCard).join("")||`<div class="card empty-note">期限超過の株はありません。</div>`}<div class="section-title">明日確認する株 <span class="small">${tom.length}株</span></div>${tom.map(plantCard).join("")||`<div class="card empty-note">明日の確認対象はありません。</div>`}<div class="section-title">最近の記録</div><div class="card">${historyHtml(recent)}</div>`;setTimeout(()=>renderAsyncPhotos(),0)}function kanaGroupRank(name){
   const n=(name||"").trim();
   if(!n)return 9;
   const c=n[0];
@@ -654,7 +668,7 @@ function photoTileHtml(ph){
   return `<div class="photo-tile" onclick="openPhotoDetail('${ph.id}')">${img}<div class="photo-label">${esc(ph.type||ph.title||"写真")}｜${(ph.takenAt||"").slice(5,10)}</div></div>`;
 }
 function openAlbum(pid){
-  const p=plantById(pid)||{id:pid,displayName:"株情報なし"},photos=(state.photos||[]).filter(ph=>ph.plantId===pid).sort((a,b)=>(b.takenAt||"").localeCompare(a.takenAt||""));
+  const p=plantById(pid)||{id:pid,displayName:"株情報なし"},allPhotos=(state.photos||[]).filter(ph=>ph.plantId===pid).sort((a,b)=>(b.takenAt||"").localeCompare(a.takenAt||""));const realPhotos=allPhotos.filter(ph=>!isPlaceholderPhoto(ph));const photos=realPhotos.length?realPhotos:allPhotos;
   setHeader("写真一覧",p.displayName);
   el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openAddPhoto('${pid}')">写真を追加</button></div>${photos.length?`<div class="card"><div class="album">${photos.map(photoTileHtml).join("")}</div></div>`:`<div class="card empty-note">写真はまだありません。</div>`}<div class="card"><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div>`;
   setTimeout(()=>renderAsyncPhotos(),0);
