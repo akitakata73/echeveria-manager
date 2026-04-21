@@ -39,12 +39,16 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 .filter-block{margin:10px 0 8px}
 .filter-label{font-size:12px;font-weight:850;color:var(--muted);margin:8px 2px 6px}
 .chip-wrap{display:flex;flex-wrap:wrap;gap:6px}
+
+.photo-missing{display:flex;align-items:center;justify-content:center;min-height:92px;border-radius:14px;background:#f3f4f6;color:#6b7280;font-size:12px;font-weight:800;text-align:center;padding:8px}
+.avatar .photo-missing{width:54px;height:54px;min-height:54px;border-radius:16px}
+.hero .photo-missing{min-height:220px}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v40 Safe Commit</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v41 Photo Stability</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v40-safe-commit";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v41-photo-stability";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -86,7 +90,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v40-safe-commit",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v41-photo-stability",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -103,7 +107,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v40-safe-commit";
+  d.version="pwa-v41-photo-stability";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -272,7 +276,15 @@ function renderAsyncPhotos(scope=document){
       if(!id)return;
       const ph=(state.photos||[]).find(x=>x.id===id);
       const url=await photoUrl(ph);
-      if(url)img.src=url;
+      const holder=scope.querySelector(`[data-photo-missing="${id}"]`);
+      if(url){
+        img.src=url;
+        img.style.display="";
+        if(holder)holder.style.display="none";
+      }else{
+        img.style.display="none";
+        if(holder){holder.style.display="flex";holder.textContent="写真本体なし";}
+      }
     });
   }catch(e){}
 }
@@ -321,7 +333,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v40-safe-commit";
+    state.version="pwa-v41-photo-stability";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -401,7 +413,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v40 Safe Commit"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v41 Photo Stability"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -494,19 +506,28 @@ function latestPhoto(pid){return state.photos.filter(p=>p.plantId===pid).sort((a
   if(!ph)return `<span class="small">No Photo</span>`;
   const inline=ph.dataUrl||ph.data||ph.src||"";
   if(inline)return `<img src="${inline}" alt="">`;
-  return `<img data-photo-id="${esc(ph.id)}" alt="">`;
+  return `<span class="photo-missing" data-photo-missing="${esc(ph.id)}">写真読込中</span><img data-photo-id="${esc(ph.id)}" alt="" style="display:none">`;
 }
-function addPhoto(plantId,title,note=""){
-  if(!pendingPhoto)return;
-  const ph={id:id("photo"),plantId,title:title||"写真",takenAt:nowText(),note:note||"",storage:"indexeddb"};
+async function addPhoto(plantId,title,note=""){
+  if(!pendingPhoto)return {ok:false,error:"no pending photo"};
   const data=pendingPhoto.dataUrl||pendingPhoto.data||pendingPhoto.src||pendingPhoto;
-  state.photos=state.photos||[];
-  state.photos.unshift(ph);
-  pendingPhoto=null;
+  const ph={id:id("photo"),plantId,title:title||"写真",takenAt:nowText(),note:note||"",storage:"indexeddb"};
   try{
     const blob=dataUrlToBlob(data);
-    if(blob)putPhotoBlob(ph.id,blob).catch(()=>toast("写真保存に失敗しました"));
-  }catch(e){toast("写真保存に失敗しました")}
+    if(!blob)throw new Error("blob conversion failed");
+    const ok=await putPhotoBlob(ph.id,blob);
+    if(!ok)throw new Error("indexedDB unavailable");
+    state.photos=state.photos||[];
+    state.photos.unshift(ph);
+    pendingPhoto=null;
+    const saved=save();
+    if(!saved||saved.ok===false)throw new Error("metadata save failed");
+    return {ok:true,photo:ph};
+  }catch(e){
+    pendingPhoto=null;
+    toast("写真の保存に失敗しました。写真は追加されていません");
+    return {ok:false,error:String(e)};
+  }
 }
 function processPhotoInput(inputId,previewId){
   const file=el(inputId).files[0];
@@ -598,12 +619,42 @@ function renderPlants(){
   el("plantList").innerHTML=list.map(plantCard).join("")||`<div class="card empty-note">該当する株はありません。</div>`;
 }
 function openDetail(pid){selectedPlantId=pid;current="plants";setTabs();const p=plantById(pid);setHeader(p.displayName,mName("cultivars",p.cultivarId));el("main").innerHTML=`<div class="card"><div class="hero">${photoHtml(p.id)}</div><div class="title">${esc(p.displayName)}</div><div class="subtitle">${esc(mName("cultivars",p.cultivarId))}｜${esc(mName("places",p.trayId))}｜${esc(p.position||"")}</div><span class="pill gray">${esc(p.growthType||"成株")}</span>${p.needsAttention?`<span class="pill warn">要観察</span>`:""}<span class="pill ${statusClass(p.status)}">${esc(p.status)}</span><span class="pill gray">${esc(mName("pots",p.potId))}</span><span class="pill gray">${esc(mName("media",p.mediumId))}</span><div class="kv"><div class="k">お迎え日</div><div>${esc(p.acquiredDate||"未記録")}</div></div><div class="kv"><div class="k">最終水やり</div><div>${esc(p.lastWateredAt||"未実施")}</div></div><div class="kv"><div class="k">水やり量</div><div>${esc(p.lastWaterAmountLevel||"未記録")}</div></div><div class="kv"><div class="k">次回確認</div><div>${esc(p.nextCheckDate||"未設定")}</div></div><div class="kv"><div class="k">メモ</div><div>${esc(p.memo||"—")}</div></div><div class="btnrow"><button class="btn" onclick="openWater('${p.id}')">水やり</button><button class="btn secondary" onclick="openObserve('${p.id}')">観察</button></div><div class="btnrow three"><button class="btn ghost" onclick="openEditPlant('${p.id}')">株情報編集</button><button class="btn ghost" onclick="openAlbum('${p.id}')">写真</button><button class="btn ghost" onclick="openClonePlant('${p.id}')">クローン作成</button></div></div><div class="section-title">履歴</div><div class="card">${historyHtml(state.histories.filter(h=>h.plantId===p.id).sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt)).slice(0,8))}</div>`;setTimeout(()=>renderAsyncPhotos(),0)}function historyHtml(list){if(!list.length)return `<div class="empty-note">履歴はありません。</div>`;return `<div class="history">${list.map(h=>{const p=plantById(h.plantId);return `<div class="hist-item"><div class="hist-title">${p?esc(p.displayName)+"｜":""}${esc(h.title)}</div><div class="hist-meta">${esc(h.happenedAt)}</div><div class="hist-text">${esc(h.note||"")}</div></div>`}).join("")}</div>`}
-function openAlbum(pid){const p=plantById(pid),photos=state.photos.filter(ph=>ph.plantId===pid).sort((a,b)=>b.takenAt.localeCompare(a.takenAt));setHeader("写真一覧",p.displayName);el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openAddPhoto('${pid}')">写真を追加</button></div>${photos.length?`<div class="card"><div class="album">${photos.map(ph=>`<div class="photo-tile" onclick="openPhotoDetail('${ph.id}')"><img src="${ph.dataUrl}"><div class="photo-label">${esc(ph.type)}｜${ph.takenAt.slice(5,10)}</div></div>`).join("")}</div></div>`:`<div class="card empty-note">写真はまだありません。</div>`}<div class="card"><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div>`;setTimeout(()=>renderAsyncPhotos(),0)}function openPhotoDetail(photoId){const ph=state.photos.find(x=>x.id===photoId),p=plantById(ph.plantId);setHeader("写真詳細",p.displayName);el("main").innerHTML=`<div class="card"><div class="hero"><img src="${ph.dataUrl}"></div><div class="kv"><div class="k">種別</div><div>${esc(ph.type)}</div></div><div class="kv"><div class="k">日時</div><div>${esc(ph.takenAt)}</div></div><div class="kv"><div class="k">メモ</div><div>${esc(ph.note||"—")}</div></div><div class="btnrow"><button class="btn ghost" onclick="openAlbum('${ph.plantId}')">戻る</button><button class="btn danger" onclick="deletePhoto('${ph.id}')">削除</button></div></div>`}
+function photoTileHtml(ph){
+  const inline=ph.dataUrl||ph.data||ph.src||"";
+  const img=inline?`<img src="${inline}">`:`<span class="photo-missing" data-photo-missing="${esc(ph.id)}">写真読込中</span><img data-photo-id="${esc(ph.id)}" style="display:none">`;
+  return `<div class="photo-tile" onclick="openPhotoDetail('${ph.id}')">${img}<div class="photo-label">${esc(ph.type||ph.title||"写真")}｜${(ph.takenAt||"").slice(5,10)}</div></div>`;
+}
+function openAlbum(pid){
+  const p=plantById(pid)||{id:pid,displayName:"株情報なし"},photos=(state.photos||[]).filter(ph=>ph.plantId===pid).sort((a,b)=>(b.takenAt||"").localeCompare(a.takenAt||""));
+  setHeader("写真一覧",p.displayName);
+  el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openAddPhoto('${pid}')">写真を追加</button></div>${photos.length?`<div class="card"><div class="album">${photos.map(photoTileHtml).join("")}</div></div>`:`<div class="card empty-note">写真はまだありません。</div>`}<div class="card"><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div>`;
+  setTimeout(()=>renderAsyncPhotos(),0);
+}
+function openPhotoDetail(photoId){
+  const ph=(state.photos||[]).find(x=>x.id===photoId);
+  if(!ph){toast("写真が見つかりません");return}
+  const p=plantById(ph.plantId)||{displayName:"株情報なし"};
+  const inline=ph.dataUrl||ph.data||ph.src||"";
+  const img=inline?`<img src="${inline}">`:`<span class="photo-missing" data-photo-missing="${esc(ph.id)}">写真読込中</span><img data-photo-id="${esc(ph.id)}" style="display:none">`;
+  setHeader("写真詳細",p.displayName);
+  el("main").innerHTML=`<div class="card"><div class="hero">${img}</div><div class="kv"><div class="k">種別</div><div>${esc(ph.type||ph.title||"写真")}</div></div><div class="kv"><div class="k">日時</div><div>${esc(ph.takenAt||"")}</div></div><div class="kv"><div class="k">メモ</div><div>${esc(ph.note||"—")}</div></div><div class="btnrow"><button class="btn ghost" onclick="openAlbum('${ph.plantId}')">戻る</button><button class="btn danger" onclick="deletePhoto('${ph.id}')">削除</button></div></div>`;
+  setTimeout(()=>renderAsyncPhotos(),0);
+}
 function deletePhoto(photoId){if(!confirm("写真を削除しますか？"))return;const ph=state.photos.find(x=>x.id===photoId);state.photos=state.photos.filter(x=>x.id!==photoId);markBackupNeeded("写真削除");save();toast("保存しました");openAlbum(ph.plantId)}
-function openAddPhoto(pid){pendingPhoto=null;const p=plantById(pid);setHeader("写真追加",p.displayName);el("main").innerHTML=`<div class="card form"><label>写真</label><input id="photoInput" type="file" accept="image/*" onchange="processPhotoInput('photoInput','photoPreview')"><div id="photoPreview" class="notice">写真は中央スクエアで切り抜き、512pxに圧縮して保存します。</div><label>写真種別</label><select id="photoType"><option>通常</option><option>水やり時</option><option>お迎え時</option><option>植え替え時</option><option>不調確認</option></select><label>メモ</label><textarea id="photoNote"></textarea><div class="btnrow"><button class="btn" onclick="saveAddedPhoto('${pid}')">保存</button><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div></div>`}
-function saveAddedPhoto(pid){if(!pendingPhoto){toast("写真を選んでください");return}const note=el("photoNote").value,type=el("photoType").value,ph=addPhoto(pid,type,note);state.histories.unshift({id:id("his"),plantId:pid,type:"photo",title:"写真追加",happenedAt:ph.takenAt,note:`${type}。${note||""}`});markBackupNeeded("写真追加");save();toast("写真を保存しました");openAlbum(pid)}
-
-
+function openAddPhoto(pid){pendingPhoto=null;const p=plantById(pid);setHeader("写真追加",p.displayName);el("main").innerHTML=`<div class="card form"><label>写真</label><input id="photoInput" type="file" accept="image/*" onchange="processPhotoInput('photoInput','photoPreview')"><div id="photoPreview" class="notice">写真は中央スクエアで切り抜き、768pxに圧縮して保存します。</div><label>写真種別</label><select id="photoType"><option>通常</option><option>水やり時</option><option>お迎え時</option><option>植え替え時</option><option>不調確認</option></select><label>メモ</label><textarea id="photoNote"></textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveAddedPhoto('${pid}')">保存</button><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div></div>`}
+async function saveAddedPhoto(pid){
+  if(!pendingPhoto){toast("写真を選んでください");return}
+  const note=el("photoNote").value,type=el("photoType").value;
+  const photoRes=await addPhoto(pid,type,note);
+  if(!photoRes.ok){restoreButton(document.querySelector("button[disabled]"));return}
+  const ph=photoRes.photo;
+  state.histories.unshift({id:id("his"),plantId:pid,type:"photo",title:"写真追加",happenedAt:ph.takenAt,note:`${type}。${note||""}`});
+  markBackupNeeded("写真追加");
+  const saved=save();
+  if(!saved||saved.ok===false){toast("保存に失敗しました");restoreButton(document.querySelector("button[disabled]"));return}
+  toast("保存しました");
+  openAlbum(pid);
+}
 function openCloneSourcePicker(){
   if(!confirmLeaveIfNeeded())return;
   clearDirty();
@@ -652,7 +703,7 @@ function cancelToPlants(){if(!confirmLeaveIfNeeded())return;clearDirty();renderP
 function cancelToDetail(pid){if(!confirmLeaveIfNeeded())return;clearDirty();openDetail(pid)}
 
 function cultivarFromForm(){const v=el("pCultivar").value;if(v!=="__new__")return v;const name=el("pNewCultivar").value.trim();if(!name){toast("新しい品種名を入力してください");return null}const ex=state.masters.cultivars.find(x=>x.name.toLowerCase()===name.toLowerCase());if(ex)return ex.id;const item={id:id("cv"),name,note:el("pNewCultivarNote").value};state.masters.cultivars.push(item);return item.id}
-function savePlant(pid=null){const name=el("pName").value.trim();if(!name){toast("管理名は必須です");restoreButton(document.querySelector("button[disabled]"));return}const cultivarId=cultivarFromForm();if(!cultivarId){restoreButton(document.querySelector("button[disabled]"));return;}const lastDate=el("pLastWater").value,lastWater=lastDate?`${lastDate} 00:00`:"未実施",status=el("pStatus").value,growthType=el("pGrowthType").value,autoDays=computeNextCheck({status,growth:growthType,trayId:el("pTray").value,potId:el("pPot").value,mediumId:el("pMedium").value,waterAmount:el("pLastAmount")?el("pLastAmount").value:"普通",baseDate:el("pLastWater").value||el("pAcquired").value||dateOnly(),datetimeText:""}).finalDays;if(pid){const p=plantById(pid);Object.assign(p,{displayName:name,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType,needsAttention:autoNeedsByStatus(status),acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterMethod:p.lastWaterMethod||"未記録",autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,updatedAt:nowText()});if(pendingPhoto)addPhoto(p.id,"株情報編集","株情報編集時に追加");state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"株編集",happenedAt:nowText(),note:"基本情報を更新"});markBackupNeeded("株情報編集");formSaved=true;clearDirty();save();toast("保存しました");openDetail(p.id)}else{const p={id:id("pl"),displayName:name,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType,needsAttention:autoNeedsByStatus(status),acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterMethod:"未記録",autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,isArchived:false,cloneSourceId:el("pCloneSourceId")?el("pCloneSourceId").value:"",cloneSourceName:el("pCloneSourceName")?el("pCloneSourceName").value:"",createdAt:nowText(),updatedAt:nowText()};state.plants.unshift(p);if(pendingPhoto)addPhoto(p.id,"お迎え時","登録時写真");state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:p.cloneSourceName?"クローン作成":"新規登録",happenedAt:nowText(),note:p.cloneSourceName?`${p.cloneSourceName}からクローン作成。次回確認：${p.nextCheckDate}`:`お迎え日：${p.acquiredDate||"未記録"}。次回確認：${p.nextCheckDate}`});markBackupNeeded("新規株登録");formSaved=true;clearDirty();save();toast("保存しました");openDetail(p.id)}}
+async function savePlant(pid=null){const name=el("pName").value.trim();if(!name){toast("管理名は必須です");restoreButton(document.querySelector("button[disabled]"));return}const cultivarId=cultivarFromForm();if(!cultivarId){restoreButton(document.querySelector("button[disabled]"));return;}const lastDate=el("pLastWater").value,lastWater=lastDate?`${lastDate} 00:00`:"未実施",status=el("pStatus").value,growthType=el("pGrowthType").value,autoDays=computeNextCheck({status,growth:growthType,trayId:el("pTray").value,potId:el("pPot").value,mediumId:el("pMedium").value,waterAmount:el("pLastAmount")?el("pLastAmount").value:"普通",baseDate:el("pLastWater").value||el("pAcquired").value||dateOnly(),datetimeText:""}).finalDays;if(pid){const p=plantById(pid);Object.assign(p,{displayName:name,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType,needsAttention:autoNeedsByStatus(status),acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterMethod:p.lastWaterMethod||"未記録",autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,updatedAt:nowText()});if(pendingPhoto)if(pendingPhoto){const photoRes=await addPhoto(p.id,"株情報編集","株情報編集時に追加");if(!photoRes.ok){restoreButton(document.querySelector("button[disabled]"));return;}}state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"株編集",happenedAt:nowText(),note:"基本情報を更新"});markBackupNeeded("株情報編集");formSaved=true;clearDirty();save();toast("保存しました");openDetail(p.id)}else{const p={id:id("pl"),displayName:name,cultivarId,potId:el("pPot").value,mediumId:el("pMedium").value,trayId:el("pTray").value,position:el("pPosition").value,status,growthType,needsAttention:autoNeedsByStatus(status),acquiredDate:el("pAcquired").value,lastWateredAt:lastWater,lastWaterAmountLevel:el("pLastAmount").value,lastWaterMethod:"未記録",autoCheckEnabled:el("pAutoCheck").value==="on",autoCheckBaseDays:autoDays,nextCheckDate:el("pNext").value,memo:el("pMemo").value,isArchived:false,cloneSourceId:el("pCloneSourceId")?el("pCloneSourceId").value:"",cloneSourceName:el("pCloneSourceName")?el("pCloneSourceName").value:"",createdAt:nowText(),updatedAt:nowText()};state.plants.unshift(p);if(pendingPhoto)if(pendingPhoto){const photoRes=await addPhoto(p.id,"お迎え時","登録時写真");if(!photoRes.ok){restoreButton(document.querySelector("button[disabled]"));return;}}state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:p.cloneSourceName?"クローン作成":"新規登録",happenedAt:nowText(),note:p.cloneSourceName?`${p.cloneSourceName}からクローン作成。次回確認：${p.nextCheckDate}`:`お迎え日：${p.acquiredDate||"未記録"}。次回確認：${p.nextCheckDate}`});markBackupNeeded("新規株登録");formSaved=true;clearDirty();save();toast("保存しました");openDetail(p.id)}}
 function archivePlant(pid){if(!confirm("この株をアーカイブしますか？"))return;const p=plantById(pid);p.isArchived=true;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"system",title:"アーカイブ",happenedAt:nowText(),note:"株を非表示化"});markBackupNeeded("株アーカイブ");save();toast("アーカイブしました");renderPlants()}
 
 function proposalHtml(r){
@@ -676,10 +727,10 @@ function syncObserveNeeds(){
 
 function openWater(pid){if(!confirmLeaveIfNeeded())return;clearDirty();pendingPhoto=null;selectedPlantId=pid;const p=plantById(pid);setHeader("水やり記録",p.displayName);el("main").innerHTML=`<div class="card form"><label>水やり日時</label><input id="wAt" value="${nowText()}" oninput="refreshWaterProposal()"><label>水やり量レベル</label><select id="wAmount" onchange="refreshWaterProposal()">${["ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${x==="普通"?"selected":""}>${x}</option>`).join("")}</select><label>状態も一緒に更新する（任意）</label><select id="wStatus" onchange="syncWaterNeeds();refreshWaterProposal()">${["良好","発根待ち","発根管理中","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p.status===x?"selected":""}>${x}</option>`).join("")}</select><label>要観察（状態に応じて自動切替）</label><select id="wNeeds" onchange="refreshWaterProposal()"><option value="off">OFF</option><option value="on" ${p.needsAttention?"selected":""}>ON</option></select><label>水やり時写真</label><input id="waterPhoto" type="file" accept="image/*" onchange="processPhotoInput('waterPhoto','waterPhotoPreview')"><div id="waterPhotoPreview" class="notice">任意。中央スクエアで保存します。</div><label>次回確認日</label><input id="wNext" type="date" value="${computeNextCheck({status:p.status,growth:p.growthType||"成株",trayId:p.trayId,potId:p.potId,mediumId:p.mediumId,waterAmount:"普通",baseDate:dateOnly(),datetimeText:nowText()}).nextDate}"><div id="waterProposalBox" class="notice">状態変更も含めて次回確認日を再計算します。</div><label>メモ</label><textarea id="wMemo" oninput="markDirty()"></textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveWater()">保存</button><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div></div>`;refreshWaterProposal()}
 function refreshWaterProposal(){const p=plantById(selectedPlantId);if(!p||!el("wNext"))return;const at=el("wAt").value||nowText(),base=(at.match(/\d{4}-\d{2}-\d{2}/)||[dateOnly()])[0],status=el("wStatus")?el("wStatus").value:p.status,r=computeNextCheck({status,growth:p.growthType||"成株",trayId:p.trayId,potId:p.potId,mediumId:p.mediumId,waterAmount:(el("wAmount")?el("wAmount").value:(p.lastWaterAmountLevel||"普通")),baseDate:base,datetimeText:at});el("wNext").value=r.nextDate;if(el("waterProposalBox"))el("waterProposalBox").innerHTML=proposalHtml(r)}
-function saveWater(){const p=plantById(selectedPlantId),at=el("wAt").value||nowText(),amount=el("wAmount").value,method="未記録",next=el("wNext").value,memo=el("wMemo").value,newStatus=el("wStatus")?el("wStatus").value:p.status,newNeeds=autoNeedsByStatus(newStatus);p.lastWateredAt=at;p.lastWaterAmountLevel=amount;p.lastWaterMethod=method;p.status=newStatus;p.needsAttention=newNeeds;p.nextCheckDate=next;p.updatedAt=nowText();const his={id:id("his"),plantId:p.id,type:"water",title:"水やり",happenedAt:at,amountLevel:amount,method,statusAfter:p.status,note:`量：${amount}。状態：${newStatus}。要観察：${newNeeds?"ON":"OFF"}。${memo||""}`};state.histories.unshift(his);if(pendingPhoto){addPhoto(p.id,"水やり時",memo,his.id);markBackupNeeded("水やり写真追加")}else{markBackupNeeded("水やり記録")}formSaved=true;clearDirty();save();toast("水やりを保存しました");openDetail(p.id)}
+async function saveWater(){const p=plantById(selectedPlantId),at=el("wAt").value||nowText(),amount=el("wAmount").value,method="未記録",next=el("wNext").value,memo=el("wMemo").value,newStatus=el("wStatus")?el("wStatus").value:p.status,newNeeds=autoNeedsByStatus(newStatus);p.lastWateredAt=at;p.lastWaterAmountLevel=amount;p.lastWaterMethod=method;p.status=newStatus;p.needsAttention=newNeeds;p.nextCheckDate=next;p.updatedAt=nowText();const his={id:id("his"),plantId:p.id,type:"water",title:"水やり",happenedAt:at,amountLevel:amount,method,statusAfter:p.status,note:`量：${amount}。状態：${newStatus}。要観察：${newNeeds?"ON":"OFF"}。${memo||""}`};state.histories.unshift(his);if(pendingPhoto){if(pendingPhoto){const photoRes=await addPhoto(p.id,"水やり時",memo,his.id);if(!photoRes.ok){restoreButton(document.querySelector("button[disabled]"));return;}}markBackupNeeded("水やり写真追加")}else{markBackupNeeded("水やり記録")}formSaved=true;clearDirty();save();toast("水やりを保存しました");openDetail(p.id)}
 function openObserve(pid){if(!confirmLeaveIfNeeded())return;clearDirty();selectedPlantId=pid;const p=plantById(pid);setHeader("観察記録",p.displayName);el("main").innerHTML=`<div class="card form"><label>観察日時</label><input id="oAt" value="${nowText()}" oninput="refreshObserveProposal()"><label>状態</label><select id="oStatus" onchange="syncObserveNeeds();refreshObserveProposal()">${["良好","発根待ち","発根管理中","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p.status===x?"selected":""}>${x}</option>`).join("")}</select><label>要観察（状態に応じて自動切替）</label><select id="oNeeds" onchange="refreshObserveProposal()"><option value="off">OFF</option><option value="on" ${p.needsAttention?"selected":""}>ON</option></select><label>次回確認日</label><input id="oNext" type="date" value="${p.nextCheckDate||dateOnly()}"><div id="observeProposalBox" class="notice">状態変更に応じて次回確認日を再計算します。</div><label>観察メモ</label><textarea id="oMemo" oninput="markDirty()"></textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveObserve()">保存</button><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div></div>`;refreshObserveProposal()}
 function refreshObserveProposal(){const p=plantById(selectedPlantId);if(!p||!el("oNext"))return;const at=el("oAt").value||nowText(),base=(at.match(/\d{4}-\d{2}-\d{2}/)||[dateOnly()])[0],status=el("oStatus").value,r=computeNextCheck({status,growth:p.growthType||"成株",trayId:p.trayId,potId:p.potId,mediumId:p.mediumId,waterAmount:(el("wAmount")?el("wAmount").value:(p.lastWaterAmountLevel||"普通")),baseDate:base,datetimeText:at});el("oNext").value=r.nextDate;if(el("observeProposalBox"))el("observeProposalBox").innerHTML=proposalHtml(r)}
-function saveObserve(){const p=plantById(selectedPlantId),at=el("oAt").value||nowText(),status=el("oStatus").value,next=el("oNext").value,memo=el("oMemo").value;p.status=status;p.needsAttention=autoNeedsByStatus(status);p.nextCheckDate=next;if(memo)p.memo=memo;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"observe",title:"観察",happenedAt:at,statusAfter:status,note:`状態：${status}。要観察：${p.needsAttention?"ON":"OFF"}。${memo||""}`});markBackupNeeded("観察記録");formSaved=true;clearDirty();save();toast("観察を保存しました");openDetail(p.id)}
+async function saveObserve(){const p=plantById(selectedPlantId),at=el("oAt").value||nowText(),status=el("oStatus").value,next=el("oNext").value,memo=el("oMemo").value;p.status=status;p.needsAttention=autoNeedsByStatus(status);p.nextCheckDate=next;if(memo)p.memo=memo;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"observe",title:"観察",happenedAt:at,statusAfter:status,note:`状態：${status}。要観察：${p.needsAttention?"ON":"OFF"}。${memo||""}`});markBackupNeeded("観察記録");formSaved=true;clearDirty();save();toast("観察を保存しました");openDetail(p.id)}
 function renderRecords(){setHeader("記録","水やり・観察履歴");const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}</div>`}
 
 function monthAdd(ym,delta){const d=new Date(ym+"-01T00:00:00");d.setMonth(d.getMonth()+delta);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -777,6 +828,13 @@ function saveInfoLine(){
   return `最終保存成功：${esc(successAt)}<br>保存サイズ：約${esc(currentSaveSizeText())}<br>写真：${(state.photos||[]).length}枚`;
 }
 
+
+function photoStatusText(){
+  const total=(state.photos||[]).length;
+  const inline=(state.photos||[]).filter(hasInlinePhotoData).length;
+  return `写真メタ情報：${total}枚${inline?`／未移行：${inline}枚`:""}`;
+}
+
 function saveStatusCard(){
   const st=state.saveStatus||{};
   const ok=st.ok!==false;
@@ -838,7 +896,7 @@ async function forceUpdateApp(){
   url.searchParams.set("force",Date.now().toString());
   location.href=url.toString();
 }
-function renderSettings(){setHeader("設定","マスター・保存");const types=["cultivars","pots","media","places"];el("main").innerHTML=`${backupCardHtml()}${saveStatusCard()}<div class="card"><span class="version-line">現在のバージョン：${APP_VERSION}</span><br><span class="version-line">保存キー：${STORAGE_KEY}</span><br><span class="version-line">読込元：${esc(state.recoveredFromKey||STORAGE_KEY)}</span><br><span class="version-line">株：${activePlants().length}／履歴：${state.histories?.length||0}／写真：${state.photos?.length||0}</span></div><div class="card"><div class="title">アプリ本体の更新</div><div class="subtitle">株データは消さず、PWA本体の古いキャッシュだけを削除して最新版を確認します。</div><div class="btnrow"><button class="btn secondary" onclick="forceUpdateApp()">アプリ本体を最新版に更新</button><button class="btn ghost" onclick="restoreEmergencyBackup()">緊急バックアップから復元</button></div></div><div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div><div class="card"><div class="title">${masterName(activeMaster)}マスター</div><button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button></div><div class="card">${masterRows(activeMaster)}</div>`}
+function renderSettings(){setHeader("設定","マスター・保存");const types=["cultivars","pots","media","places"];el("main").innerHTML=`${backupCardHtml()}${saveStatusCard()}<div class="card"><span class="version-line">現在のバージョン：${APP_VERSION}</span><br><span class="version-line">保存キー：${STORAGE_KEY}</span><br><span class="version-line">読込元：${esc(state.recoveredFromKey||STORAGE_KEY)}</span><br><span class="version-line">株：${activePlants().length}／履歴：${state.histories?.length||0}／写真：${state.photos?.length||0}</span><br><span class="version-line">${photoStatusText()}</span></div><div class="card"><div class="title">アプリ本体の更新</div><div class="subtitle">株データは消さず、PWA本体の古いキャッシュだけを削除して最新版を確認します。</div><div class="btnrow"><button class="btn secondary" onclick="forceUpdateApp()">アプリ本体を最新版に更新</button><button class="btn ghost" onclick="restoreEmergencyBackup()">緊急バックアップから復元</button></div></div><div class="chips">${types.map(t=>`<div class="chip ${activeMaster===t?'active':''}" onclick="activeMaster='${t}';renderSettings()">${masterName(t)}</div>`).join("")}</div><div class="card"><div class="title">${masterName(activeMaster)}マスター</div><button class="btn secondary" onclick="openMasterForm('${activeMaster}')">新規追加</button></div><div class="card">${masterRows(activeMaster)}</div>`}
 function masterRows(t){const arr=sortedMasterList(t);return arr.map(item=>{const count=usedCount(t,item.id),meta=(t==="pots"||t==="media")?`乾きやすさ：${item.dry||"普通"}${item.note?`｜${item.note}`:""}`:(item.note||((item.direction||"")+" "+(item.placement||""))||"メモなし");return `<div class="master-row"><div class="grow"><div class="master-name">${esc(item.name)}</div><div class="master-meta">使用中：${count}件｜${esc(meta)}</div></div><button class="iconbtn" onclick="openMasterForm('${t}','${item.id}')">編集</button><button class="iconbtn danger" onclick="deleteMaster('${t}','${item.id}')">削除</button></div>`}).join("")||`<div class="empty-note">未登録です。</div>`}
 function openMasterForm(t,i=null){activeMaster=t;editingMasterId=i;const item=i?mList(t).find(x=>x.id===i):null;setHeader(`${masterName(t)}${item?"編集":"追加"}`,"マスター管理");if(t==="places")el("main").innerHTML=`<div class="card form"><label>置き場所名</label><input id="mName" value="${attr(item?.name||"")}"><label>日当たり（方角）</label><select id="mDirection">${["東向き","西向き","南向き","北向き","室内照明"].map(x=>`<option ${item?.direction===x?"selected":""}>${x}</option>`).join("")}</select><label>設置場所</label><select id="mPlacement">${["室内","屋外"].map(x=>`<option ${item?.placement===x?"selected":""}>${x}</option>`).join("")}</select><label>乾きやすさ</label><select id="mDry">${["かなり乾きやすい","やや乾きやすい","普通","やや乾きにくい","かなり乾きにくい"].map(x=>`<option ${item?.dry===x?"selected":""}>${x}</option>`).join("")}</select><label>光</label><select id="mLight">${["かなり弱い","弱い","中くらい","強い","かなり強い"].map(x=>`<option ${item?.light===x?"selected":""}>${x}</option>`).join("")}</select><label>風</label><select id="mWind">${["弱風あり","中くらい","強風あり","風なし","不定期"].map(x=>`<option ${item?.wind===x?"selected":""}>${x}</option>`).join("")}</select><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`;else if(t==="pots"||t==="media")el("main").innerHTML=`<div class="card form"><label>${masterName(t)}名</label><input id="mName" value="${attr(item?.name||"")}"><label>乾きやすさ</label><select id="mDry">${["かなり乾きやすい","やや乾きやすい","普通","やや乾きにくい","かなり乾きにくい"].map(x=>`<option ${(item?.dry||"普通")===x?"selected":""}>${x}</option>`).join("")}</select><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`;
 else el("main").innerHTML=`<div class="card form"><label>${masterName(t)}名</label><input id="mName" value="${attr(item?.name||"")}"><label>メモ</label><textarea id="mNote">${esc(item?.note||"")}</textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveMaster('${t}')">保存</button><button class="btn ghost" onclick="go('settings')">戻る</button></div></div>`}
