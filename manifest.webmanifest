@@ -1,7 +1,7 @@
 {
   "name": "エケベリア管理",
   "short_name": "エケベリア",
-  "description": "設定タブ不具合を修正した保存データ復旧版 v25",
+  "description": "保存キー固定化とバックアップ表示整理を行ったエケベリア管理PWA v26 Stable",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f5f2",
