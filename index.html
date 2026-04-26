@@ -62,9 +62,9 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v51 Clone Safe Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v52 Photo Integrity Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v51-clone-safe-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v52-photo-integrity-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -106,7 +106,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v51-clone-safe-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v52-photo-integrity-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -123,7 +123,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v51-clone-safe-fix";
+  d.version="pwa-v52-photo-integrity-fix";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -349,7 +349,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v51-clone-safe-fix";
+    state.version="pwa-v52-photo-integrity-fix";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -429,7 +429,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v51 Clone Safe Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v52 Photo Integrity Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -982,6 +982,73 @@ function openDetail(pid){
   setTimeout(()=>renderAsyncPhotos(),0);
 }
 function historyHtml(list){if(!list.length)return `<div class="empty-note">履歴はありません。</div>`;return `<div class="history">${list.map(h=>{const p=plantById(h.plantId);return `<div class="hist-item"><div class="hist-title">${p?esc(p.displayName)+"｜":""}${esc(h.title)}</div><div class="hist-meta">${esc(h.happenedAt)}</div><div class="hist-text">${esc(h.note||"")}</div></div>`}).join("")}</div>`}
+
+async function deletePhoto(photoId){
+  const ph=(state.photos||[]).find(x=>x.id===photoId);
+  if(!ph){toast("写真が見つかりません");return}
+  if(!confirm("この写真を削除しますか？")) return;
+  const beforePhotos = JSON.stringify(state.photos||[]);
+  const beforeHistories = JSON.stringify(state.histories||[]);
+  const beforePh = JSON.stringify(ph);
+  try{
+    state.photos=(state.photos||[]).filter(x=>x.id!==photoId);
+    const historyItem = makePhotoHistoryItem(ph.plantId, "写真削除", `${ph.type||"写真"} を削除`);
+    state.histories.unshift(historyItem);
+    markBackupNeeded("写真削除");
+    const saved=save();
+    if(!saved||saved.ok===false){
+      state.photos = JSON.parse(beforePhotos);
+      state.histories = JSON.parse(beforeHistories);
+      toast("保存に失敗しました。保存していません");
+      return;
+    }
+    await deletePhotoBlobSafe(photoId);
+    toast("削除しました");
+    openAlbum(ph.plantId);
+  }catch(e){
+    state.photos = JSON.parse(beforePhotos);
+    state.histories = JSON.parse(beforeHistories);
+    try{
+      const parsed = JSON.parse(beforePh);
+      if(parsed && !(state.photos||[]).find(x=>x.id===parsed.id)){
+        state.photos.unshift(parsed);
+      }
+    }catch(_){}
+    toast("保存に失敗しました。保存していません");
+  }
+}
+function makePhotoHistoryItem(pid, type, note){
+  return {
+    id:id("his"),
+    plantId:pid,
+    type:"photo",
+    title:type,
+    happenedAt:nowText(),
+    note:note||type
+  };
+}
+
+
+async function deletePhotoBlobSafe(photoId){
+  try{
+    if(typeof deletePhotoBlob==="function"){
+      await deletePhotoBlob(photoId);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function makePhotoHistoryItem(pid, title, note){
+  return {
+    id:id("his"),
+    plantId:pid,
+    type:"photo",
+    title:title,
+    happenedAt:nowText(),
+    note:note||title
+  };
+}
+
 function photoTileHtml(ph){
   const inline=ph.dataUrl||ph.data||ph.src||"";
   const img=inline?`<img src="${inline}">`:`<span class="photo-missing" data-photo-missing="${esc(ph.id)}">写真読込中</span><img data-photo-id="${esc(ph.id)}" style="display:none">`;
@@ -1008,15 +1075,34 @@ function openAddPhoto(pid){pendingPhoto=null;const p=plantById(pid);setHeader("�
 async function saveAddedPhoto(pid){
   if(!pendingPhoto){toast("写真を選んでください");return}
   const note=el("photoNote").value,type=el("photoType").value;
+  const beforePhotos = JSON.stringify(state.photos||[]);
+  const historyItem = makePhotoHistoryItem(pid, "写真追加", `${type}。${note||""}`);
   const photoRes=await addPhoto(pid,type,note);
   if(!photoRes.ok){restoreButton(document.querySelector("button[disabled]"));return}
   const ph=photoRes.photo;
-  state.histories.unshift({id:id("his"),plantId:pid,type:"photo",title:"写真追加",happenedAt:ph.takenAt,note:`${type}。${note||""}`});
-  markBackupNeeded("写真追加");
-  const saved=save();
-  if(!saved||saved.ok===false){toast("保存に失敗しました");restoreButton(document.querySelector("button[disabled]"));return}
-  toast("保存しました");
-  openAlbum(pid);
+  try{
+    state.histories.unshift(historyItem);
+    markBackupNeeded("写真追加");
+    const saved=save();
+    if(!saved||saved.ok===false){
+      state.photos = JSON.parse(beforePhotos);
+      if(state.histories?.[0]?.id===historyItem.id) state.histories.shift();
+      await deletePhotoBlobSafe(ph.id);
+      toast("保存に失敗しました。保存していません");
+      restoreButton(document.querySelector("button[disabled]"));
+      return;
+    }
+    toast("保存しました");
+    openAlbum(pid);
+  }catch(e){
+    state.photos = JSON.parse(beforePhotos);
+    try{
+      if(state.histories?.[0]?.id===historyItem.id) state.histories.shift();
+    }catch(_){}
+    await deletePhotoBlobSafe(ph.id);
+    toast("保存に失敗しました。保存していません");
+    restoreButton(document.querySelector("button[disabled]"));
+  }
 }
 function openCloneSourcePicker(){
   if(!confirmLeaveIfNeeded())return;
