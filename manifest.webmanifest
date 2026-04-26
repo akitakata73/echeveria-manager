@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "写真追加・削除の整合性を強化したエケベリア管理PWA v52"
+  "description": "既存株編集処理を安全化したエケベリア管理PWA v53"
 }
