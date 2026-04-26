@@ -62,9 +62,9 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v48 Watering Connection Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v49 Observe Safe Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v48-watering-connection-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v49-observe-safe-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -106,7 +106,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v48-watering-connection-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v49-observe-safe-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -123,7 +123,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v48-watering-connection-fix";
+  d.version="pwa-v49-observe-safe-fix";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -349,7 +349,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v48-watering-connection-fix";
+    state.version="pwa-v49-observe-safe-fix";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -429,7 +429,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v48 Watering Connection Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v49 Observe Safe Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -646,6 +646,56 @@ function computeQuickNextCheck(p){
   return p.nextCheckDate||dateOnly();
 }
 
+
+
+function normalizedObserveInputFromForm(pid){
+  const p=plantById(pid)||{};
+  const status = el("oStatus")?.value || p.status || "良好";
+  const note = el("oNote")?.value || "";
+  const autoNeeds = status==="良好" ? false : true;
+  const manual = el("oNeedsAttention");
+  const needsAttention = manual ? !!manual.checked : autoNeeds;
+  return {
+    plantId: pid,
+    status,
+    growth: p.growthType || "成株",
+    trayId: p.trayId || "",
+    potId: p.potId || "",
+    mediumId: p.mediumId || "",
+    needsAttention,
+    baseDate: dateOnly(),
+    datetimeText: nowText(),
+    memo: note,
+    shouldRecalc: true
+  };
+}
+function safeObserveNextCheck(input, currentPlant){
+  if(!input.shouldRecalc){
+    return currentPlant?.nextCheckDate || "";
+  }
+  let next = "";
+  if(typeof computeNextCheck === "function"){
+    const result = computeNextCheck({
+      status: input.status,
+      growth: input.growth,
+      trayId: input.trayId,
+      potId: input.potId,
+      mediumId: input.mediumId,
+      waterAmount: currentPlant?.lastWaterAmountLevel && currentPlant.lastWaterAmountLevel!=="未記録" ? currentPlant.lastWaterAmountLevel : "普通",
+      baseDate: currentPlant?.lastWateredAt || input.baseDate,
+      datetimeText: input.datetimeText
+    });
+    if(result && typeof result === "object"){
+      next = result.nextDate || result.nextCheckDate || result.date || "";
+    }else if(typeof result === "string"){
+      next = result;
+    }
+  }
+  if(!isValidISODateText(next)){
+    throw new Error("invalid nextCheckDate");
+  }
+  return next;
+}
 
 function normalizedWaterInputFromForm(pid){
   return {
@@ -1109,9 +1159,82 @@ async function saveWater(pid){
     restoreButton(document.querySelector("button[disabled]"));
   }
 }
-function openObserve(pid){if(!confirmLeaveIfNeeded())return;clearDirty();selectedPlantId=pid;const p=plantById(pid);setHeader("観察記録",p.displayName);el("main").innerHTML=`<div class="card form"><label>観察日時</label><input id="oAt" value="${nowText()}" oninput="refreshObserveProposal()"><label>状態</label><select id="oStatus" onchange="syncObserveNeeds();refreshObserveProposal()">${["良好","発根待ち","発根管理中","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p.status===x?"selected":""}>${x}</option>`).join("")}</select><label>要観察（状態に応じて自動切替）</label><select id="oNeeds" onchange="refreshObserveProposal()"><option value="off">OFF</option><option value="on" ${p.needsAttention?"selected":""}>ON</option></select><label>次回確認日</label><input id="oNext" type="date" value="${p.nextCheckDate||dateOnly()}"><div id="observeProposalBox" class="notice">状態変更に応じて次回確認日を再計算します。</div><label>観察メモ</label><textarea id="oMemo" oninput="markDirty()"></textarea><div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveObserve()">保存</button><button class="btn ghost" onclick="cancelToDetail('${pid}')">戻る</button></div></div>`;refreshObserveProposal()}
+function openObserve(pid){
+  const p=plantById(pid);
+  if(!p){toast("株情報が見つかりません");go("plants");return}
+  selectedPlantId=pid;
+  setHeader("観察",p.displayName);
+  const status=p.status||"良好";
+  const note=p.memo||"";
+  const needs=status==="良好"?false:true;
+  const nextPreview=(()=>{try{return safeObserveNextCheck({plantId:pid,status,growth:p.growthType||"成株",trayId:p.trayId||"",potId:p.potId||"",mediumId:p.mediumId||"",needsAttention:needs,baseDate:dateOnly(),datetimeText:nowText(),memo:note,shouldRecalc:true}, p)}catch(e){return p.nextCheckDate||""}})();
+  el("main").innerHTML=`<div class="card"><div class="title">通常観察</div><div class="subtitle">${esc(p.displayName)}</div>
+  <div class="field"><label>状態</label><select id="oStatus">${["良好","水切れ気味","蒸れ注意","発根待ち","発根管理中","休眠気味","その他"].map(x=>`<option value="${x}" ${x===status?"selected":""}>${x}</option>`).join("")}</select></div>
+  <div class="field"><label><input type="checkbox" id="oNeedsAttention" ${needs?"checked":""}> 要観察</label></div>
+  <div class="field"><label>観察メモ</label><textarea id="oNote" placeholder="必要ならメモ">${esc(note)}</textarea></div>
+  <div class="summary-grid">
+    <div class="summary-item"><span class="k">現在状態</span><span>${esc(status)}</span></div>
+    <div class="summary-item"><span class="k">次回確認（予定）</span><span>${nextPreview?mdText(nextPreview):"未計算"} ${nextPreview?checkStatusPill(nextPreview):""}</span></div>
+  </div>
+  <div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveObserve('${pid}')">保存</button><button class="btn ghost" onclick="openDetail('${pid}')">戻る</button></div></div>`;
+}
 function refreshObserveProposal(){const p=plantById(selectedPlantId);if(!p||!el("oNext"))return;const at=el("oAt").value||nowText(),base=(at.match(/\d{4}-\d{2}-\d{2}/)||[dateOnly()])[0],status=el("oStatus").value,r=computeNextCheck({status,growth:p.growthType||"成株",trayId:p.trayId,potId:p.potId,mediumId:p.mediumId,waterAmount:(el("wAmount")?el("wAmount").value:(p.lastWaterAmountLevel||"普通")),baseDate:base,datetimeText:at});el("oNext").value=r.nextDate;if(el("observeProposalBox"))el("observeProposalBox").innerHTML=proposalHtml(r)}
-async function saveObserve(){const p=plantById(selectedPlantId),at=el("oAt").value||nowText(),status=el("oStatus").value,next=el("oNext").value,memo=el("oMemo").value;p.status=status;p.needsAttention=autoNeedsByStatus(status);p.nextCheckDate=next;if(memo)p.memo=memo;p.updatedAt=nowText();state.histories.unshift({id:id("his"),plantId:p.id,type:"observe",title:"観察",happenedAt:at,statusAfter:status,note:`状態：${status}。要観察：${p.needsAttention?"ON":"OFF"}。${memo||""}`});markBackupNeeded("観察記録");formSaved=true;clearDirty();save();toast("観察を保存しました");openDetail(p.id)}
+async function saveObserve(pid){
+  pid = pid || selectedPlantId;
+  const p=plantById(pid);
+  if(!p){toast("株情報が見つかりません");restoreButton(document.querySelector("button[disabled]"));return}
+  const before = JSON.stringify(p);
+  const input = normalizedObserveInputFromForm(pid);
+  let next="";
+  try{
+    next=safeObserveNextCheck(input, p);
+  }catch(e){
+    toast("次回確認日の計算に失敗しました。保存していません");
+    restoreButton(document.querySelector("button[disabled]"));
+    return;
+  }
+
+  const draft = {...p};
+  draft.status = input.status;
+  draft.needsAttention = input.status==="良好" ? false : input.needsAttention;
+  draft.updatedAt = input.datetimeText;
+  draft.nextCheckDate = next;
+  if(input.memo){
+    draft.memo = input.memo;
+  }
+
+  try{
+    Object.assign(p, draft);
+    state.histories.unshift({
+      id:id("his"),
+      plantId:p.id,
+      type:"observe",
+      title:"観察",
+      happenedAt:input.datetimeText,
+      note:`状態：${input.status}。要観察：${draft.needsAttention?"ON":"OFF"}。次回確認：${p.nextCheckDate}${input.memo?`。メモ：${input.memo}`:""}`
+    });
+    markBackupNeeded("観察");
+    const saved=save();
+    if(!saved||saved.ok===false){
+      Object.assign(p, JSON.parse(before));
+      state.histories.shift();
+      toast("保存に失敗しました。保存していません");
+      restoreButton(document.querySelector("button[disabled]"));
+      return;
+    }
+    toast("保存しました");
+    openDetail(pid);
+  }catch(e){
+    Object.assign(p, JSON.parse(before));
+    try{
+      if(state.histories?.[0]?.plantId===pid && state.histories?.[0]?.title==="観察"){
+        state.histories.shift();
+      }
+    }catch(_){}
+    toast("保存に失敗しました。保存していません");
+    restoreButton(document.querySelector("button[disabled]"));
+  }
+}
 function renderRecords(){setHeader("記録","水やり・観察履歴");const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}</div>`}
 
 function monthAdd(ym,delta){const d=new Date(ym+"-01T00:00:00");d.setMonth(d.getMonth()+delta);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
