@@ -73,12 +73,16 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 .choice-btn.active{border-color:rgba(17,24,39,.6);box-shadow:0 0 0 2px rgba(17,24,39,.08) inset;background:rgba(253,255,0,.22)}
 @media(max-width:380px){.choice-grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}.choice-btn{font-size:13px}}
 
+
+.memo-large{min-height:120px;font-size:16px;line-height:1.6;padding:12px;border-radius:12px;resize:vertical}
+.field textarea.memo-large{width:100%;box-sizing:border-box}
+
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v55 Water Touch UI Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v56 Preview Memo UI Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v55-water-touch-ui-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v56-preview-memo-ui-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -120,7 +124,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v55-water-touch-ui-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v56-preview-memo-ui-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -137,7 +141,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v55-water-touch-ui-fix";
+  d.version="pwa-v56-preview-memo-ui-fix";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -363,7 +367,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v55-water-touch-ui-fix";
+    state.version="pwa-v56-preview-memo-ui-fix";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -443,7 +447,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v55 Water Touch UI Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v56 Preview Memo UI Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -1523,9 +1527,43 @@ function syncObserveNeeds(){
 }
 
 
-function choiceButtons(inputId, values, selected, columns=2){
+
+function setText(id,html){
+  const node=el(id);
+  if(node)node.innerHTML=html;
+}
+function updateObserveNextPreview(){
+  const v=el("oNextCheckDate")?.value||"";
+  if(isValidISODateText(v)){
+    setText("oNextPreview", `${mdText(v)} ${checkStatusPill(v)}`);
+  }else{
+    setText("oNextPreview", "未設定");
+  }
+}
+function updateWaterNextPreview(pid){
+  const p=plantById(pid);
+  if(!p)return;
+  const amount=el("wAmount")?.value||"普通";
+  const status=el("wStatus")?.value||p.status||"良好";
+  const next=(()=>{try{return safeWaterNextCheck({plantId:pid,status,growth:p.growthType||"成株",trayId:p.trayId||"",potId:p.potId||"",mediumId:p.mediumId||"",waterAmount:amount,baseDate:dateOnly(),datetimeText:nowText(),memo:""})}catch(e){return ""}})();
+  if(next&&isValidISODateText(next)){
+    setText("wNextPreview", `${mdText(next)} ${checkStatusPill(next)}`);
+  }else{
+    setText("wNextPreview", "未計算");
+  }
+}
+function setChoiceValueAndPreview(inputId,value,btn,pid){
+  setChoiceValue(inputId,value,btn);
+  if(pid)updateWaterNextPreview(pid);
+}
+function setObserveNextDateAndPreview(days){
+  setObserveNextDate(days);
+  updateObserveNextPreview();
+}
+
+function choiceButtons(inputId, values, selected, columns=2, previewPid=""){
   const group=`choice_${inputId}`;
-  return `<input type="hidden" id="${inputId}" value="${attr(selected||values[0]||"")}"><div class="choice-grid cols-${columns}" data-choice-group="${group}">${values.map(v=>`<button type="button" class="choice-btn ${v===selected?"active":""}" data-choice-value="${attr(v)}" onclick="setChoiceValue('${inputId}','${attr(v)}',this)">${esc(v)}</button>`).join("")}</div>`;
+  return `<input type="hidden" id="${inputId}" value="${attr(selected||values[0]||"")}"><div class="choice-grid cols-${columns}" data-choice-group="${group}">${values.map(v=>`<button type="button" class="choice-btn ${v===selected?"active":""}" data-choice-value="${attr(v)}" onclick="setChoiceValueAndPreview('${inputId}','${attr(v)}',this,'${attr(previewPid)}')">${esc(v)}</button>`).join("")}</div>`;
 }
 function setChoiceValue(inputId,value,btn){
   const input=el(inputId);
@@ -1547,12 +1585,12 @@ function openWater(pid){
   const status=p.status||"良好";
   const nextPreview=(()=>{try{return safeWaterNextCheck({plantId:pid,status,growth:p.growthType||"成株",trayId:p.trayId||"",potId:p.potId||"",mediumId:p.mediumId||"",waterAmount:amount,baseDate:d,datetimeText:nowText(),memo:""})}catch(e){return p.nextCheckDate||""}})();
   el("main").innerHTML=`<div class="card"><div class="title">通常水やり</div><div class="subtitle">${esc(p.displayName)}</div>
-  <div class="field"><label>水量</label>${choiceButtons("wAmount",["ごく少なめ","少なめ","普通","多め","かなり多め"],amount,2)}</div>
-  <div class="field"><label>状態</label>${choiceButtons("wStatus",["良好","水切れ気味","蒸れ注意","発根待ち","発根管理中","休眠気味","その他"],status,2)}</div>
-  <div class="field"><label>メモ</label><textarea id="wNote" placeholder="必要ならメモ">${esc(p.memo||"")}</textarea></div>
+  <div class="field"><label>水量</label>${choiceButtons("wAmount",["ごく少なめ","少なめ","普通","多め","かなり多め"],amount,2,pid)}</div>
+  <div class="field"><label>状態</label>${choiceButtons("wStatus",["良好","水切れ気味","蒸れ注意","発根待ち","発根管理中","休眠気味","その他"],status,2,pid)}</div>
+  <div class="field"><label>メモ</label><textarea id="wNote" class="memo-large" rows="5" placeholder="必要ならメモ">${esc(p.memo||"")}</textarea></div>
   <div class="summary-grid">
     <div class="summary-item"><span class="k">最終水やり</span><span>${waterSinceText(p)}</span></div>
-    <div class="summary-item"><span class="k">次回確認（自動）</span><span>${nextPreview?mdText(nextPreview):"未計算"} ${nextPreview?checkStatusPill(nextPreview):""}</span></div>
+    <div class="summary-item"><span class="k">次回確認（自動）</span><span id="wNextPreview">${nextPreview?mdText(nextPreview):"未計算"} ${nextPreview?checkStatusPill(nextPreview):""}</span></div>
   </div>
   <div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveWater('${pid}')">保存</button><button class="btn ghost" onclick="openDetail('${pid}')">戻る</button></div></div>`;
 }
@@ -1626,12 +1664,12 @@ function openObserve(pid){
   el("main").innerHTML=`<div class="card"><div class="title">通常観察</div><div class="subtitle">${esc(p.displayName)}</div>
   <div class="field"><label>状態</label><select id="oStatus" onchange="syncObserveNeedsAttention()">${["良好","水切れ気味","蒸れ注意","発根待ち","発根管理中","休眠気味","その他"].map(x=>`<option value="${x}" ${x===status?"selected":""}>${x}</option>`).join("")}</select></div>
   <div class="field"><label><input type="checkbox" id="oNeedsAttention" ${needs?"checked":""}> 要観察</label></div>
-  <div class="field"><label>次回確認日</label><input id="oNextCheckDate" type="date" value="${defaultNext}"></div>
-  <div class="btnrow four"><button class="btn ghost" onclick="setObserveNextDate(1)">明日</button><button class="btn ghost" onclick="setObserveNextDate(2)">2日後</button><button class="btn ghost" onclick="setObserveNextDate(3)">3日後</button><button class="btn ghost" onclick="setObserveNextDate(7)">来週</button></div>
-  <div class="field"><label>観察メモ</label><textarea id="oNote" placeholder="必要ならメモ">${esc(note)}</textarea></div>
+  <div class="field"><label>次回確認日</label><input id="oNextCheckDate" type="date" value="${defaultNext}" onchange="updateObserveNextPreview()"></div>
+  <div class="btnrow four"><button class="btn ghost" onclick="setObserveNextDateAndPreview(1)">明日</button><button class="btn ghost" onclick="setObserveNextDateAndPreview(2)">2日後</button><button class="btn ghost" onclick="setObserveNextDateAndPreview(3)">3日後</button><button class="btn ghost" onclick="setObserveNextDateAndPreview(7)">来週</button></div>
+  <div class="field"><label>観察メモ</label><textarea id="oNote" class="memo-large" rows="5" placeholder="必要ならメモ">${esc(note)}</textarea></div>
   <div class="summary-grid">
     <div class="summary-item"><span class="k">現在状態</span><span>${esc(status)}</span></div>
-    <div class="summary-item"><span class="k">次回確認</span><span>${mdText(defaultNext)} ${checkStatusPill(defaultNext)}</span></div>
+    <div class="summary-item"><span class="k">次回確認</span><span id="oNextPreview">${mdText(defaultNext)} ${checkStatusPill(defaultNext)}</span></div>
   </div>
   <div class="btnrow"><button class="btn" onclick="if(onceAction(this))saveObserve('${pid}')">保存</button><button class="btn ghost" onclick="openDetail('${pid}')">戻る</button></div></div>`;
   syncObserveNeedsAttention();
