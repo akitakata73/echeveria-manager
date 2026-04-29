@@ -77,12 +77,16 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 .memo-large{min-height:120px;font-size:16px;line-height:1.6;padding:12px;border-radius:12px;resize:vertical}
 .field textarea.memo-large{width:100%;box-sizing:border-box}
 
+
+.diagnosis-textarea{width:100%;box-sizing:border-box;min-height:240px;font-size:14px;line-height:1.55;padding:12px;border-radius:12px;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}
+.backup-textarea{width:100%;box-sizing:border-box}
+
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v56 Preview Memo UI Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v57 Diagnosis Export Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v56-preview-memo-ui-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v57-diagnosis-export-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -124,7 +128,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v56-preview-memo-ui-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v57-diagnosis-export-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -141,7 +145,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v56-preview-memo-ui-fix";
+  d.version="pwa-v57-diagnosis-export-fix";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -367,7 +371,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v56-preview-memo-ui-fix";
+    state.version="pwa-v57-diagnosis-export-fix";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -447,7 +451,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v56 Preview Memo UI Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v57 Diagnosis Export Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -1731,7 +1735,100 @@ async function saveObserve(pid){
     restoreButton(document.querySelector("button[disabled]"));
   }
 }
-function renderRecords(){setHeader("記録","水やり・観察履歴");const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}</div>`}
+
+function shortMemoText(text,max=90){
+  const t=String(text||"").replace(/\s+/g," ").trim();
+  if(!t)return "なし";
+  return t.length>max?t.slice(0,max)+"…":t;
+}
+function diagnosisHistoryText(pid){
+  const list=(state.histories||[]).filter(h=>h.plantId===pid).slice(0,3);
+  if(!list.length)return "なし";
+  return list.map(h=>{
+    const d=mdText(String(h.happenedAt||"").slice(0,10));
+    return `${d} ${h.title||""}`;
+  }).join("、");
+}
+function diagnosisPhotoText(pid){
+  const n=(state.photos||[]).filter(ph=>ph.plantId===pid && !ph.isPlaceholder).length;
+  return n?`あり（${n}枚）`:"なし";
+}
+function buildDiagnosisExportText(){
+  const active=(state.plants||[]).filter(p=>!p.isArchived);
+  const now=new Date();
+  const header=[
+    "【エケベリア診断用株情報】",
+    `作成日：${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`,
+    `株数：${active.length}`,
+    "※これはChatGPT診断用の軽量データです。復旧用バックアップではありません。",
+    ""
+  ];
+  const body=active.map((p,idx)=>{
+    const cultivar=mName("cultivars",p.cultivarId)||"未設定";
+    const pot=mName("pots",p.potId)||"未設定";
+    const media=mName("media",p.mediumId)||"未設定";
+    const place=mName("places",p.trayId)||mName("trays",p.trayId)||"未設定";
+    const needs=p.needsAttention?"あり":"なし";
+    const status=p.status||"未設定";
+    const growth=p.growthType||"未設定";
+    const water=waterSinceText(p);
+    const next=nextCheckDateText(p);
+    const memo=shortMemoText(p.memo,90);
+    const hist=diagnosisHistoryText(p.id);
+    const photo=diagnosisPhotoText(p.id);
+    return [
+      `【${idx+1}. ${p.displayName||"名称未設定"}】`,
+      `品種：${cultivar}｜区分：${growth}`,
+      `状態：${status}｜要観察：${needs}`,
+      `水やり：${water}｜次回：${next}`,
+      `鉢：${pot}｜用土：${media}｜場所：${place}${p.position?`（${p.position}）`:""}`,
+      `写真：${photo}`,
+      `メモ：${memo}`,
+      `直近履歴：${hist}`,
+      ""
+    ].join("\n");
+  }).join("\n");
+  return header.join("\n")+body;
+}
+function renderDiagnosisExport(){
+  const txt=buildDiagnosisExportText();
+  const area=el("diagnosisExportText");
+  if(area)area.value=txt;
+  const meta=el("diagnosisExportMeta");
+  if(meta)meta.textContent=`診断用データを作成しました（${txt.length}文字）`;
+}
+function selectDiagnosisExport(){
+  const area=el("diagnosisExportText");
+  if(!area){toast("診断用データ欄が見つかりません");return}
+  if(!area.value)renderDiagnosisExport();
+  area.focus();
+  area.select();
+  try{area.setSelectionRange(0,area.value.length)}catch(e){}
+  toast("全選択しました");
+}
+async function copyDiagnosisExport(){
+  const area=el("diagnosisExportText");
+  if(!area){toast("診断用データ欄が見つかりません");return}
+  if(!area.value)renderDiagnosisExport();
+  try{
+    await navigator.clipboard.writeText(area.value);
+    toast("診断用データをコピーしました");
+  }catch(e){
+    area.focus();
+    area.select();
+    try{document.execCommand("copy");toast("診断用データをコピーしました")}catch(_){toast("コピーできませんでした。全選択してコピーしてください")}
+  }
+}
+
+function renderRecords(){setHeader("記録","水やり・観察履歴");const list=state.histories.slice().sort((a,b)=>b.happenedAt.localeCompare(a.happenedAt));el("main").innerHTML=`<div class="card"><button class="btn secondary" onclick="openExportCenter()">バックアップ</button></div><div class="card">${historyHtml(list)}
+  <div class="card">
+    <div class="title">診断用データ</div>
+    <div class="subtitle">ChatGPTで各株の生育診断を行うための軽量データです。復旧用ではありません。</div>
+    <div class="btnrow"><button class="btn secondary" onclick="renderDiagnosisExport()">診断用データを作成</button><button class="btn ghost" onclick="selectDiagnosisExport()">全選択</button><button class="btn ghost" onclick="copyDiagnosisExport()">コピー</button></div>
+    <div id="diagnosisExportMeta" class="notice">未作成</div>
+    <textarea id="diagnosisExportText" class="backup-textarea diagnosis-textarea" placeholder="ここに診断用株情報が表示されます。"></textarea>
+  </div>
+</div>`}
 
 function monthAdd(ym,delta){const d=new Date(ym+"-01T00:00:00");d.setMonth(d.getMonth()+delta);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function calendarFilteredPlants(list){
