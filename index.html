@@ -150,12 +150,27 @@ button[disabled],.btn[disabled]{opacity:.62;pointer-events:none}
 .leaf-table th,.leaf-table td{border-bottom:1px solid rgba(17,24,39,.08);padding:8px 4px;text-align:left;font-size:14px}
 @media(max-width:430px){.leaf-head,.leaf-row{grid-template-columns:1fr 64px 64px auto;gap:5px}.btn.mini{padding:7px 6px}}
 
+
+.leaf-total-preview{font-weight:800}
+.leaf-row{grid-template-columns:1.3fr auto .85fr auto .85fr auto!important}
+.leaf-head{grid-template-columns:1.3fr .85fr .85fr auto!important}
+.leaf-count-box{display:flex;gap:4px;align-items:center}
+.leaf-count-box input{width:54px;text-align:center}
+.leaf-step{min-width:32px;min-height:34px;border:1px solid rgba(17,24,39,.18);border-radius:9px;background:#fff;font-weight:900}
+@media(max-width:520px){
+  .leaf-row{grid-template-columns:1fr auto .8fr!important}
+  .leaf-row label:nth-of-type(2){grid-column:1/2}
+  .leaf-row .leaf-count-box:nth-of-type(2){grid-column:2/4}
+  .leaf-row .btn.mini{grid-column:1/4}
+  .leaf-head{display:none}
+}
+
 </style>
 </head>
 <body>
-<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v65 Leaf Group Base Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
+<div class="app"><header><div><h1 id="screenTitle">ホーム</h1><div class="small" id="screenSub">エケベリア管理 PWA v66 Leaf Group Count UI Fix</div></div><button class="btn secondary" style="width:auto;padding:9px 12px" onclick="refreshCurrent()">↻</button></header><main id="main"></main><nav class="tabbar"><div class="tab active" onclick="go('home')" id="tab-home"><div class="ico">🏠</div><div>ホーム</div></div><div class="tab" onclick="go('plants')" id="tab-plants"><div class="ico">🌱</div><div>株一覧</div></div><div class="tab" onclick="go('records')" id="tab-records"><div class="ico">📝</div><div>記録</div></div><div class="tab" onclick="go('calendar')" id="tab-calendar"><div class="ico">📅</div><div>カレンダー</div></div><div class="tab" onclick="go('settings')" id="tab-settings"><div class="ico">⚙️</div><div>設定</div></div></nav></div><div class="toast" id="toast"></div>
 <script>
-const APP_VERSION="v65-leaf-group-base-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
+const APP_VERSION="v66-leaf-group-count-ui-fix";const STORAGE_KEY="echeveria_pwa_data";let state=null,current="home",filter="すべて",plantFilterMode="status",plantStatusFilter="すべて",plantCultivarFilter="すべて",selectedPlantId=null,activeMaster="cultivars",editingMasterId=null,pendingPhoto=null,calendarMonth=dateOnly().slice(0,7),selectedCalendarDate=dateOnly(),calendarFilter="すべて";
 function id(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}function nowText(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function dateOnly(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}function addDays(ds,n){const d=ds?new Date(ds+"T00:00:00"):new Date();d.setDate(d.getDate()+Number(n||0));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
 function datePartFromText(t){return (t||"").slice(0,10)}
@@ -197,7 +212,7 @@ function backupCardHtml(){
 }
 
 function inferDirection(txt){if((txt||"").includes("東"))return"東向き";if((txt||"").includes("西"))return"西向き";if((txt||"").includes("北"))return"北向き";if((txt||"").includes("照明"))return"室内照明";return"南向き"}function inferPlacement(txt){return (txt||"").includes("屋外")||(txt||"").includes("外")?"屋外":"室内"}function normalizeDry(v){if(!v)return"普通";if(v.includes("早め"))return"やや乾きやすい";if(v.includes("遅め"))return"やや乾きにくい";return v.replace(/^\\d：/,"")}function normalizeWind(v){if(v==="風強め")return"強風あり";if(v==="弱め")return"中くらい";return v}
-function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v65-leaf-group-base-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
+function defaultData(){const cv1=id("cv"),cv2=id("cv"),cv3=id("cv"),pot1=id("pot"),pot2=id("pot"),pot3=id("pot"),med1=id("med"),med2=id("med"),tray1=id("tray"),tray2=id("tray");return{version:"pwa-v66-leaf-group-count-ui-fix",updatedAt:nowText(),masters:{cultivars:[{id:cv1,name:"桃太郎",note:"赤い爪。通常管理"},{id:cv2,name:"ブラックマディバ",note:"辛め管理"},{id:cv3,name:"大和錦",note:"葉挿し・胴切り候補"}],pots:[{id:pot1,name:"A-25S浅鉢",note:"標準",dry:"やや乾きやすい"},{id:pot2,name:"小型仮鉢",note:"発根待ち",dry:"普通"},{id:pot3,name:"葉挿しトレー",note:"葉挿し用",dry:"やや乾きにくい"}],media:[{id:med1,name:"チャコボール",note:"標準用土",dry:"やや乾きやすい"},{id:med2,name:"チャコボール＋少量肥料",note:"成株用",dry:"普通"}]},trays:[{id:tray1,name:"A-25Sトレー1",direction:"南向き",placement:"室内",dry:"普通",light:"強い",wind:"弱風あり",note:"中央は乾きやすい"},{id:tray2,name:"発根待ちエリア",direction:"室内照明",placement:"室内",dry:"やや乾きにくい",light:"中くらい",wind:"中くらい",note:"水を入れすぎない"}],plants:[],histories:[],photos:[],backup:{lastAt:"",dirty:true,reason:"初回バックアップ未実施"},exportLogs:[]}}
 function normalizePlantForV7(p){
   p=(p&&typeof p==="object")?p:{};
   let growthType=p.growthType||"成株",status=p.status||"良好",needsAttention=!!p.needsAttention;
@@ -214,7 +229,7 @@ function ensureMasterItem(arr, fallback){
 function migrate(d){
   const base=defaultData();
   d=(d&&typeof d==="object")?d:{};
-  d.version="pwa-v65-leaf-group-base-fix";
+  d.version="pwa-v66-leaf-group-count-ui-fix";
   d.masters=d.masters&&typeof d.masters==="object"?d.masters:{};
   d.masters.cultivars=ensureMasterItem(d.masters.cultivars, base.masters.cultivars[0]);
   d.masters.pots=ensureMasterItem(d.masters.pots, base.masters.pots[0]).map(x=>({...x,dry:normalizeDry(x.dry||"普通")}));
@@ -440,7 +455,7 @@ function verifyStoredPayload(key,payload){
 function save(){
   if(!state)return {ok:false,error:"state empty"};
   try{
-    state.version="pwa-v65-leaf-group-base-fix";
+    state.version="pwa-v66-leaf-group-count-ui-fix";
     state.lastSavedAt=nowText();
     state.saveSeq=(state.saveSeq||0)+1;
 
@@ -520,7 +535,7 @@ function weekdayClass(y,m,d){
   return w===0?" sun":w===6?" sat":"";
 }
 
-function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v65 Leaf Group Base Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
+function setHeader(t,s){el("screenTitle").textContent=t;el("screenSub").textContent=s||"エケベリア管理 PWA v66 Leaf Group Count UI Fix"}function setTabs(){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));el("tab-"+current)?.classList.add("active")}let formDirty=false, formSaved=false, currentExportKind="";
 function markDirty(){formDirty=true}
 function clearDirty(){formDirty=false;formSaved=false}
 function hasUnsavedText(){
@@ -1553,6 +1568,16 @@ function normalizedLeafBatchItems(raw){
     pot1Count:Math.max(0,Number(x?.pot1Count||0))
   })).filter(x=>x.cultivarId&&(x.preRootCount>0||x.pot1Count>0));
 }
+
+function leafBatchCategoryTotals(p){
+  const items=normalizedLeafBatchItems(p?.leafBatchData?.items||[]);
+  return items.reduce((acc,x)=>{
+    acc.preRoot+=x.preRootCount;
+    acc.pot1+=x.pot1Count;
+    acc.total+=x.preRootCount+x.pot1Count;
+    return acc;
+  },{preRoot:0,pot1:0,total:0});
+}
 function leafBatchTotal(p){
   return normalizedLeafBatchItems(p?.leafBatchData?.items||[]).reduce((sum,x)=>sum+x.preRootCount+x.pot1Count,0);
 }
@@ -1581,12 +1606,65 @@ function leafGroupRowsHtml(p){
 function leafGroupRowHtml(item={},i=0){
   const cultivarOptions=sortedMasterList("cultivars").map(x=>`<option value="${x.id}" ${item.cultivarId===x.id?"selected":""}>${esc(x.name)}</option>`).join("");
   return `<div class="leaf-row" data-leaf-row="${i}">
-    <select class="leafCultivar">${cultivarOptions}</select>
-    <label>発根前</label><input class="leafPreRoot" type="number" min="0" step="1" value="${Number(item.preRootCount||0)}" oninput="markDirty()">
-    <label>1号</label><input class="leafPot1" type="number" min="0" step="1" value="${Number(item.pot1Count||0)}" oninput="markDirty()">
+    <select class="leafCultivar" onchange="markDirty();updateLeafGroupTotalPreview()">${cultivarOptions}</select>
+    <label>発根前</label>
+    <div class="leaf-count-box"><button type="button" class="leaf-step" onclick="stepLeafCount(this,'.leafPreRoot',-1)">−</button><input class="leafPreRoot" type="number" min="0" step="1" value="${Number(item.preRootCount||0)}" oninput="markDirty();updateLeafGroupTotalPreview()"><button type="button" class="leaf-step" onclick="stepLeafCount(this,'.leafPreRoot',1)">＋</button></div>
+    <label>1号</label>
+    <div class="leaf-count-box"><button type="button" class="leaf-step" onclick="stepLeafCount(this,'.leafPot1',-1)">−</button><input class="leafPot1" type="number" min="0" step="1" value="${Number(item.pot1Count||0)}" oninput="markDirty();updateLeafGroupTotalPreview()"><button type="button" class="leaf-step" onclick="stepLeafCount(this,'.leafPot1',1)">＋</button></div>
     <button type="button" class="btn ghost mini" onclick="removeLeafGroupRow(this)">削除</button>
   </div>`;
 }
+
+function stepLeafCount(btn,selector,delta){
+  const row=btn?.closest?.(".leaf-row");
+  const input=row?.querySelector?.(selector);
+  if(!input)return;
+  const v=Math.max(0,Number(input.value||0)+Number(delta||0));
+  input.value=String(v);
+  markDirty();
+  updateLeafGroupTotalPreview();
+}
+function currentLeafGroupItemsFromDom(){
+  const rows=[...document.querySelectorAll("#leafGroupRows .leaf-row")];
+  return rows.map(r=>({
+    cultivarId:r.querySelector(".leafCultivar")?.value||"",
+    preRootCount:Math.max(0,Number(r.querySelector(".leafPreRoot")?.value||0)),
+    pot1Count:Math.max(0,Number(r.querySelector(".leafPot1")?.value||0))
+  })).filter(x=>x.cultivarId&&(x.preRootCount>0||x.pot1Count>0));
+}
+function aggregateLeafItems(items){
+  const map=new Map();
+  (Array.isArray(items)?items:[]).forEach(x=>{
+    const id=String(x?.cultivarId||"");
+    if(!id)return;
+    const cur=map.get(id)||{cultivarId:id,preRootCount:0,pot1Count:0};
+    cur.preRootCount+=Math.max(0,Number(x?.preRootCount||0));
+    cur.pot1Count+=Math.max(0,Number(x?.pot1Count||0));
+    map.set(id,cur);
+  });
+  return [...map.values()].filter(x=>x.preRootCount>0||x.pot1Count>0);
+}
+function updateLeafGroupTotalPreview(){
+  const box=el("leafGroupTotalPreview");
+  if(!box)return;
+  const items=aggregateLeafItems(currentLeafGroupItemsFromDom());
+  const pre=items.reduce((s,x)=>s+x.preRootCount,0);
+  const pot=items.reduce((s,x)=>s+x.pot1Count,0);
+  box.innerHTML=`発根前 ${pre}枚 ／ 1号 ${pot}個 ／ 合計 ${pre+pot}`;
+}
+function mergeLeafGroupRowsInForm(){
+  const box=el("leafGroupRows");
+  if(!box)return;
+  const merged=aggregateLeafItems(currentLeafGroupItemsFromDom());
+  if(!merged.length){
+    box.innerHTML=leafGroupRowHtml({},0);
+  }else{
+    box.innerHTML=merged.map((item,i)=>leafGroupRowHtml(item,i)).join("");
+  }
+  updateLeafGroupTotalPreview();
+  markDirty();
+}
+
 function renderLeafGroupFields(p){
   const on=isLeafGroup(p);
   const loc=p?.leafBatchData?.location||"home";
@@ -1605,9 +1683,9 @@ function renderLeafGroupFields(p){
         <option value="jikka" ${loc==="jikka"?"selected":""}>実家葉挿し</option>
       </select>
       <div class="notice">配置は、自宅葉挿し＝自宅　棚、実家葉挿し＝実家その他として扱います。</div>
-      <div class="leaf-head"><span>品種</span><span>発根前</span><span>1号</span><span></span></div>
+      <div id="leafGroupTotalPreview" class="notice leaf-total-preview">発根前 0枚 ／ 1号 0個 ／ 合計 0</div><div class="leaf-head"><span>品種</span><span>発根前</span><span>1号</span><span></span></div>
       <div id="leafGroupRows">${leafGroupRowsHtml(p)}</div>
-      <div class="btnrow"><button type="button" class="btn ghost" onclick="addLeafGroupRow()">品種行を追加</button><button type="button" class="btn ghost" onclick="applyLeafGroupLocationPlacement()">配置を反映</button></div>
+      <div class="btnrow"><button type="button" class="btn ghost" onclick="addLeafGroupRow()">品種行を追加</button><button type="button" class="btn ghost" onclick="mergeLeafGroupRowsInForm()">同じ品種を集約</button><button type="button" class="btn ghost" onclick="applyLeafGroupLocationPlacement()">配置を反映</button></div>
     </div>
   </div>`;
 }
@@ -1615,7 +1693,7 @@ function toggleLeafGroupFields(){
   const on=el("pLeafGroupMode")?.value==="on";
   const box=el("leafGroupFields");
   if(box)box.style.display=on?"":"none";
-  if(on)applyLeafGroupLocationPlacement();
+  if(on){applyLeafGroupLocationPlacement();setTimeout(updateLeafGroupTotalPreview,0)}
   markDirty();
 }
 function addLeafGroupRow(){
@@ -1623,23 +1701,20 @@ function addLeafGroupRow(){
   if(!box)return;
   const idx=box.querySelectorAll(".leaf-row").length;
   box.insertAdjacentHTML("beforeend",leafGroupRowHtml({},idx));
+  updateLeafGroupTotalPreview();
   markDirty();
 }
 function removeLeafGroupRow(btn){
   const row=btn?.closest?.(".leaf-row");
   if(row)row.remove();
+  updateLeafGroupTotalPreview();
   markDirty();
 }
 function readLeafBatchDataFromForm(){
   const on=el("pLeafGroupMode")?.value==="on";
   if(!on)return {leafGroupMode:false,leafBatchData:null};
   const location=el("pLeafGroupLocation")?.value||"home";
-  const rows=[...document.querySelectorAll("#leafGroupRows .leaf-row")];
-  const items=rows.map(r=>({
-    cultivarId:r.querySelector(".leafCultivar")?.value||"",
-    preRootCount:Math.max(0,Number(r.querySelector(".leafPreRoot")?.value||0)),
-    pot1Count:Math.max(0,Number(r.querySelector(".leafPot1")?.value||0))
-  })).filter(x=>x.cultivarId&&(x.preRootCount>0||x.pot1Count>0));
+  const items=aggregateLeafItems(currentLeafGroupItemsFromDom());
   return {leafGroupMode:true,leafBatchData:{mode:"leaf_group",location,items}};
 }
 function applyLeafGroupLocationPlacement(){
@@ -1664,10 +1739,10 @@ function leafGroupActionButtons(p){
 }
 function leafGroupDetailHtml(p){
   if(!isLeafGroup(p))return "";
-  const total=leafBatchTotal(p);
+  const totals=leafBatchCategoryTotals(p);
   const items=normalizedLeafBatchItems(p?.leafBatchData?.items||[]);
   const rows=items.map(x=>`<tr><td>${esc(mName("cultivars",x.cultivarId)||"品種未設定")}</td><td>${x.preRootCount}枚</td><td>${x.pot1Count}個</td></tr>`).join("");
-  return `<div class="card"><div class="title">${esc(leafGroupLocationLabel(p.leafBatchData?.location))}</div><div class="subtitle">合計 ${total}個（発根前＋1号ポット）</div>${rows?`<table class="leaf-table"><thead><tr><th>品種</th><th>発根前</th><th>1号</th></tr></thead><tbody>${rows}</tbody></table>`:`<div class="notice">葉挿し内訳は未登録です。</div>`}</div>`;
+  return `<div class="card"><div class="title">${esc(leafGroupLocationLabel(p.leafBatchData?.location))}</div><div class="subtitle">発根前 ${totals.preRoot}枚 ／ 1号 ${totals.pot1}個 ／ 合計 ${totals.total}</div>${rows?`<table class="leaf-table"><thead><tr><th>品種</th><th>発根前</th><th>1号</th></tr></thead><tbody>${rows}</tbody></table>`:`<div class="notice">葉挿し内訳は未登録です。</div>`}</div>`;
 }
 function ensureLeafGroupDefaults(p){
   if(!p||!isLeafGroup(p))return;
@@ -1717,7 +1792,7 @@ function openNewLeafGroup(location="home"){
   renderPlantForm(p);
 }
 
-function renderPlantForm(p){pendingPhoto=null;const edit=!!(p&&p.id);el("main").innerHTML=`${!edit?`<div class="card"><button class="btn secondary" onclick="openCloneSourcePicker()">既存株からのクローンを作成</button></div>`:""}<div class="card form"><label>写真${edit?"追加":"登録時写真"}</label><input id="plantPhoto" type="file" accept="image/*" onchange="processPhotoInput('plantPhoto','plantPhotoPreview')"><div id="plantPhotoPreview" class="notice">任意。選択すると中央スクエアで保存します。</div><input type="hidden" id="pCloneSourceName" value="${attr(p?.cloneSourceName||"")}"><input type="hidden" id="pCloneSourceId" value="${attr(p?.cloneSourceId||"")}"><label>管理名</label><input id="pName" value="${attr(p?.displayName||"")}" placeholder="例：桃太郎 1号" oninput="markDirty()"><label>品種</label><select id="pCultivar">${sortedMasterList("cultivars").map(x=>`<option value="${x.id}" ${p?.cultivarId===x.id?"selected":""}>${esc(x.name)}${usedCount("cultivars",x.id)?`（${usedCount("cultivars",x.id)}）`:""}</option>`).join("")}<option value="__new__">＋品種を新規追加</option></select><input id="pNewCultivar" placeholder="新しい品種名（例：ラウリンゼ）" style="margin-top:8px;display:none"><textarea id="pNewCultivarNote" placeholder="品種メモ（任意）" style="margin-top:8px;display:none;min-height:60px"></textarea><label>鉢</label><select id="pPot" onchange="refreshSuggestedCheck()">${sortedMasterList("pots").map(x=>`<option value="${x.id}" ${p?.potId===x.id?"selected":""}>${esc(x.name)}${usedCount("pots",x.id)?`（${usedCount("pots",x.id)}）`:""}</option>`).join("")}</select><label>用土</label><select id="pMedium">${sortedMasterList("media").map(x=>`<option value="${x.id}" ${p?.mediumId===x.id?"selected":""}>${esc(x.name)}${usedCount("media",x.id)?`（${usedCount("media",x.id)}）`:""}</option>`).join("")}</select><label>置き場所</label><select id="pTray" onchange="refreshSuggestedCheck()">${sortedMasterList("places").map(x=>`<option value="${x.id}" ${p?.trayId===x.id?"selected":""}>${esc(x.name)}${usedCount("places",x.id)?`（${usedCount("places",x.id)}）`:""}</option>`).join("")}</select><label>位置メモ</label><input id="pPosition" value="${attr(p?.position||"")}" placeholder="例：中央" oninput="markDirty()">${renderPlacementFields(p)}${renderLeafGroupFields(p)}<label>個体区分</label><select id="pGrowthType" onchange="refreshSuggestedCheck()">${["成株","葉挿し","頭株","元株","子株","中株","実生","その他"].map(x=>`<option ${(p?.growthType||"成株")===x?"selected":""}>${x}</option>`).join("")}</select><label>状態</label><select id="pStatus" onchange="syncPlantFormNeeds();refreshSuggestedCheck()">${["良好","発根待ち","発根管理中","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p?.status===x?"selected":""}>${x}</option>`).join("")}</select><label>要観察（状態に応じて自動切替）</label><select id="pNeedsAttention"><option value="off">OFF</option><option value="on" ${p?.needsAttention?"selected":""}>ON</option></select><label>お迎え日</label><input id="pAcquired" type="date" value="${attr(p?.acquiredDate||dateOnly())}" onchange="refreshSuggestedCheck()"><label>最終水やり日</label><input id="pLastWater" type="date" value="${attr((p?.lastWateredAt&&p.lastWateredAt!=="未実施")?p.lastWateredAt.slice(0,10):"")}" onchange="refreshSuggestedCheck()"><label>最終水やり量</label><select id="pLastAmount" onchange="refreshSuggestedCheck()">${["未記録","なし","ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${p?.lastWaterAmountLevel===x?"selected":""}>${x}</option>`).join("")}</select><label>自動確認目安</label><select id="pAutoCheck" onchange="refreshSuggestedCheck()"><option value="on" ${p?.autoCheckEnabled!==false?"selected":""}>自動で次回確認日を提案</option><option value="off" ${p?.autoCheckEnabled===false?"selected":""}>手動で指定</option></select><label>次回確認日</label><input id="pNext" type="date" value="${attr(p?.nextCheckDate||dateOnly())}"><div id="proposalBox" class="notice">次回確認日の計算理由を表示します。</div><label>メモ</label><textarea id="pMemo" oninput="markDirty()">${esc(p?.memo||"")}</textarea><div class="btnrow"><button class="btn" onclick="${edit?`savePlant('${p.id}')`:"savePlant()"}">保存</button><button class="btn ghost" onclick="${edit?`cancelToDetail('${p.id}')`:"cancelToPlants()"}">戻る</button></div>${edit?`<button class="btn danger" style="margin-top:8px" onclick="archivePlant('${p.id}')">アーカイブ</button>`:""}</div>`;el("pCultivar").addEventListener("change",()=>{const n=el("pCultivar").value==="__new__";el("pNewCultivar").style.display=n?"block":"none";el("pNewCultivarNote").style.display=n?"block":"none"});syncPlantFormNeeds();updatePlacementUi(p?.id||"");refreshSuggestedCheck()}
+function renderPlantForm(p){pendingPhoto=null;const edit=!!(p&&p.id);el("main").innerHTML=`${!edit?`<div class="card"><button class="btn secondary" onclick="openCloneSourcePicker()">既存株からのクローンを作成</button></div>`:""}<div class="card form"><label>写真${edit?"追加":"登録時写真"}</label><input id="plantPhoto" type="file" accept="image/*" onchange="processPhotoInput('plantPhoto','plantPhotoPreview')"><div id="plantPhotoPreview" class="notice">任意。選択すると中央スクエアで保存します。</div><input type="hidden" id="pCloneSourceName" value="${attr(p?.cloneSourceName||"")}"><input type="hidden" id="pCloneSourceId" value="${attr(p?.cloneSourceId||"")}"><label>管理名</label><input id="pName" value="${attr(p?.displayName||"")}" placeholder="例：桃太郎 1号" oninput="markDirty()"><label>品種</label><select id="pCultivar">${sortedMasterList("cultivars").map(x=>`<option value="${x.id}" ${p?.cultivarId===x.id?"selected":""}>${esc(x.name)}${usedCount("cultivars",x.id)?`（${usedCount("cultivars",x.id)}）`:""}</option>`).join("")}<option value="__new__">＋品種を新規追加</option></select><input id="pNewCultivar" placeholder="新しい品種名（例：ラウリンゼ）" style="margin-top:8px;display:none"><textarea id="pNewCultivarNote" placeholder="品種メモ（任意）" style="margin-top:8px;display:none;min-height:60px"></textarea><label>鉢</label><select id="pPot" onchange="refreshSuggestedCheck()">${sortedMasterList("pots").map(x=>`<option value="${x.id}" ${p?.potId===x.id?"selected":""}>${esc(x.name)}${usedCount("pots",x.id)?`（${usedCount("pots",x.id)}）`:""}</option>`).join("")}</select><label>用土</label><select id="pMedium">${sortedMasterList("media").map(x=>`<option value="${x.id}" ${p?.mediumId===x.id?"selected":""}>${esc(x.name)}${usedCount("media",x.id)?`（${usedCount("media",x.id)}）`:""}</option>`).join("")}</select><label>置き場所</label><select id="pTray" onchange="refreshSuggestedCheck()">${sortedMasterList("places").map(x=>`<option value="${x.id}" ${p?.trayId===x.id?"selected":""}>${esc(x.name)}${usedCount("places",x.id)?`（${usedCount("places",x.id)}）`:""}</option>`).join("")}</select><label>位置メモ</label><input id="pPosition" value="${attr(p?.position||"")}" placeholder="例：中央" oninput="markDirty()">${renderPlacementFields(p)}${renderLeafGroupFields(p)}<label>個体区分</label><select id="pGrowthType" onchange="refreshSuggestedCheck()">${["成株","葉挿し","頭株","元株","子株","中株","実生","その他"].map(x=>`<option ${(p?.growthType||"成株")===x?"selected":""}>${x}</option>`).join("")}</select><label>状態</label><select id="pStatus" onchange="syncPlantFormNeeds();refreshSuggestedCheck()">${["良好","発根待ち","発根管理中","水切れ気味","蒸れ注意","植え替え直後","休眠気味"].map(x=>`<option ${p?.status===x?"selected":""}>${x}</option>`).join("")}</select><label>要観察（状態に応じて自動切替）</label><select id="pNeedsAttention"><option value="off">OFF</option><option value="on" ${p?.needsAttention?"selected":""}>ON</option></select><label>お迎え日</label><input id="pAcquired" type="date" value="${attr(p?.acquiredDate||dateOnly())}" onchange="refreshSuggestedCheck()"><label>最終水やり日</label><input id="pLastWater" type="date" value="${attr((p?.lastWateredAt&&p.lastWateredAt!=="未実施")?p.lastWateredAt.slice(0,10):"")}" onchange="refreshSuggestedCheck()"><label>最終水やり量</label><select id="pLastAmount" onchange="refreshSuggestedCheck()">${["未記録","なし","ごく少量","少なめ","普通","多め","たっぷり"].map(x=>`<option ${p?.lastWaterAmountLevel===x?"selected":""}>${x}</option>`).join("")}</select><label>自動確認目安</label><select id="pAutoCheck" onchange="refreshSuggestedCheck()"><option value="on" ${p?.autoCheckEnabled!==false?"selected":""}>自動で次回確認日を提案</option><option value="off" ${p?.autoCheckEnabled===false?"selected":""}>手動で指定</option></select><label>次回確認日</label><input id="pNext" type="date" value="${attr(p?.nextCheckDate||dateOnly())}"><div id="proposalBox" class="notice">次回確認日の計算理由を表示します。</div><label>メモ</label><textarea id="pMemo" oninput="markDirty()">${esc(p?.memo||"")}</textarea><div class="btnrow"><button class="btn" onclick="${edit?`savePlant('${p.id}')`:"savePlant()"}">保存</button><button class="btn ghost" onclick="${edit?`cancelToDetail('${p.id}')`:"cancelToPlants()"}">戻る</button></div>${edit?`<button class="btn danger" style="margin-top:8px" onclick="archivePlant('${p.id}')">アーカイブ</button>`:""}</div>`;el("pCultivar").addEventListener("change",()=>{const n=el("pCultivar").value==="__new__";el("pNewCultivar").style.display=n?"block":"none";el("pNewCultivarNote").style.display=n?"block":"none"});syncPlantFormNeeds();updatePlacementUi(p?.id||"");updateLeafGroupTotalPreview();refreshSuggestedCheck()}
 function autoNeedsByStatus(status){return status!=="良好"}
 function renderProposalBox(r){if(!el("proposalBox"))return;el("proposalBox").innerHTML=`<b>次回確認：${r.nextDate}</b><br>${r.lines.map(x=>esc(x)).join("<br>")}${r.warning?`<br><br><b>${esc(r.warning)}</b>`:""}`}
 function refreshSuggestedCheck(){if(!el("pStatus")||!el("pNext"))return;const st=el("pStatus").value,g=el("pGrowthType")?el("pGrowthType").value:"成株",base=el("pLastWater").value||el("pAcquired").value||dateOnly(),r=computeNextCheck({status:st,growth:g,trayId:el("pTray").value,potId:el("pPot").value,mediumId:el("pMedium").value,waterAmount:el("pLastAmount")?el("pLastAmount").value:"普通",baseDate:base,datetimeText:""});if(el("pAutoCheck")?.value!=="off")el("pNext").value=r.nextDate;renderProposalBox(r)}
