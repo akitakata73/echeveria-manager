@@ -1,4 +1,4 @@
-const CACHE_NAME="echeveria-pwa-v67-leaf-group-migration-helper-fix";
+const CACHE_NAME="echeveria-pwa-v68-home-pmt35-placement-fix";
 const ASSETS=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));self.clients.claim()});
